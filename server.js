@@ -14,13 +14,50 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 fs.mkdirSync(DATA_DIR,   { recursive: true });
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-if (!fs.existsSync(STATE_FILE)) {
-  fs.writeFileSync(STATE_FILE, JSON.stringify({
-    users: {}, posts: [], comments: []
-  }, null, 2));
+function hash(str){
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (((h*33) ^ str.charCodeAt(i)) >>> 0);
+  return h.toString(36);
 }
 
-app.use(express.json({ limit: '10mb' }));
+function defaultTheme(){
+  return { accent:'#c084fc', bg1:'#2a1650', bg2:'#0a0713', angle:140, font:'ui', avatarShape:'circle', pattern:'none' };
+}
+
+function defaultAppSettings(){
+  return {
+    theme:'neon', accent:'#c084fc',
+    bg1:'#06040c', bg2:'#241242', bg3:'#0d2a3d',
+    font:'ui', radius:20, density:'normal', calm:false
+  };
+}
+
+function ensureWestic(profiles){
+  if(!profiles.westic){
+    profiles.westic = {
+      id:'westic', login:'westic', passHash: hash('cotvmes'),
+      name:'Westic', bio:'Хозяин этого мира ✨',
+      avatar:null, cover:null,
+      theme: defaultTheme(),
+      friends:[], stickers:[], gifts:[], posts:[]
+    };
+  } else {
+    profiles.westic.login    = 'westic';
+    profiles.westic.passHash = hash('cotvmes');
+  }
+}
+
+function defaultState(){
+  const profiles = {};
+  ensureWestic(profiles);
+  return { profiles, appSettings: defaultAppSettings() };
+}
+
+if (!fs.existsSync(STATE_FILE)) {
+  fs.writeFileSync(STATE_FILE, JSON.stringify(defaultState(), null, 2));
+}
+
+app.use(express.json({ limit: '20mb' }));
 app.use(express.static(PUBLIC_DIR));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
@@ -32,19 +69,34 @@ const upload = multer({
       cb(null, Date.now() + '_' + Math.random().toString(36).slice(2, 8) + ext);
     }
   }),
-  limits: { fileSize: 30 * 1024 * 1024 }
+  limits: { fileSize: 50 * 1024 * 1024 }
 });
 
 app.get('/api/state', (req, res) => {
-  try { res.json(JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))); }
-  catch (e) { res.status(500).json({ error: 'read' }); }
+  try {
+    const raw = fs.readFileSync(STATE_FILE, 'utf8');
+    const data = JSON.parse(raw);
+    if(!data.profiles) data.profiles = {};
+    ensureWestic(data.profiles);
+    if(!data.appSettings) data.appSettings = defaultAppSettings();
+    res.json(data);
+  } catch (e) {
+    res.json(defaultState());
+  }
 });
 
 app.post('/api/state', (req, res) => {
   try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(req.body, null, 2));
+    const data = req.body;
+    if(!data || typeof data !== 'object') return res.status(400).json({ error: 'invalid' });
+    if(!data.profiles) data.profiles = {};
+    ensureWestic(data.profiles);
+    if(!data.appSettings) data.appSettings = defaultAppSettings();
+    fs.writeFileSync(STATE_FILE, JSON.stringify(data, null, 2));
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'write' }); }
+  } catch (e) {
+    res.status(500).json({ error: 'write' });
+  }
 });
 
 app.post('/api/upload', upload.single('file'), (req, res) => {
@@ -53,5 +105,6 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('✅ http://localhost:' + PORT);
+  console.log('✅ Сервер: http://localhost:' + PORT);
+  console.log('📁 Данные: ' + DATA_DIR);
 });
