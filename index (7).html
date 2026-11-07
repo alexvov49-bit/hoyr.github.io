@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой мир — фото, музыка, стихи и книги</title>
+<style>
+/* ================= БАЗА ================= */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --app-accent:#c084fc;
+  --app-bg1:#06040c;
+  --app-bg2:#241242;
+  --app-bg3:#0d2a3d;
+  --app-radius:20px;
+  --app-font:"Segoe UI", system-ui, -apple-system, sans-serif;
+  --accent:#c084fc;
+  --text:#eae7f5;
+  --muted:#9a93b5;
+  --card:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.09);
+}
+html,body{height:100%}
+body{
+  font-family:var(--app-font);
+  background:
+    radial-gradient(1100px 600px at 15% -10%, var(--app-bg2) 0%, transparent 60%),
+    radial-gradient(900px 500px at 95% 0%, var(--app-bg3) 0%, transparent 55%),
+    var(--app-bg1);
+  background-attachment:fixed;
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:90px;
+  overflow-x:hidden;
+  transition:background .5s ease;
+}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea{font-family:inherit}
+.muted{color:var(--muted);font-size:14px;line-height:1.5}
+
+/* ============ СПОКОЙНЫЙ РЕЖИМ / ПЛОТНОСТЬ ============ */
+body.calm *,
+body.calm *::before,
+body.calm *::after{
+  animation-duration:.001ms !important;
+  animation-iteration-count:1 !important;
+  transition-duration:.001ms !important;
+  scroll-behavior:auto !important;
+}
+body.density-compact .card{padding:10px;margin-bottom:10px}
+body.density-compact .post-info{padding:8px 10px;gap:4px}
+body.density-compact .btn{padding:7px 12px;font-size:13px}
+body.density-compact .cover{height:200px}
+body.density-compact .topbar{padding:8px 16px}
+body.density-compact .layout{gap:12px;margin-top:16px}
+body.density-compact .feed-comments{padding-top:8px;margin-top:8px}
+body.density-compact .comment{padding:6px 8px}
+
+/* ================= ЗАГРУЗКА ================= */
+#loader{
+  position:fixed;inset:0;z-index:9999;
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 45%, #2a1650 0%, #06040c 70%);
+  transition:opacity .7s ease, visibility .7s ease;
+}
+#loader.hide{opacity:0;visibility:hidden}
+.loader-box{display:grid;place-items:center;gap:22px}
+.loader-core{position:relative;width:104px;height:104px}
+.loader-core .ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:3px solid transparent;border-top-color:#c084fc;
+  animation:spin 1.1s linear infinite;
+}
+.loader-core .ring:nth-child(2){inset:14px;border-top-color:#38bdf8;animation-duration:1.7s;animation-direction:reverse}
+.loader-core .ring:nth-child(3){inset:28px;border-top-color:#fb7185;animation-duration:2.3s}
+.loader-core .emoji{position:absolute;inset:0;display:grid;place-items:center;font-size:28px;animation:pulse 1.5s ease-in-out infinite}
+.loader-text{font-size:15px;letter-spacing:3px;text-transform:uppercase;color:#b9a9e8}
+.loader-dots{display:flex;gap:8px}
+.loader-dots span{width:8px;height:8px;border-radius:50%;background:#c084fc;animation:bounceDot 1.2s ease-in-out infinite}
+.loader-dots span:nth-child(2){animation-delay:.15s;background:#38bdf8}
+.loader-dots span:nth-child(3){animation-delay:.3s;background:#fb7185}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@keyframes bounceDot{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-9px);opacity:1}}
+
+/* ================= ТОПБАР ================= */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:12px 22px;
+  background:color-mix(in srgb, var(--app-bg1) 78%, transparent);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.brand{
+  font-weight:800;font-size:19px;letter-spacing:.4px;
+  background:linear-gradient(90deg,#c084fc,#38bdf8,#fb7185);
+  background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 6s linear infinite;
+}
+@keyframes shine{to{background-position:200% center}}
+.top-nav{display:flex;gap:6px}
+.nav-btn{
+  padding:8px 14px;border-radius:12px;font-size:13px;font-weight:700;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--muted);transition:.22s;
+}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,.1);transform:translateY(-1px)}
+.nav-btn.active{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;border-color:transparent;
+  box-shadow:0 6px 18px -8px var(--app-accent);
+}
+.who-tabs{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center}
+.who-tab{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 13px 6px 6px;border-radius:999px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--line);
+  font-size:13.5px;font-weight:600;
+  transition:.25s;
+}
+.who-tab span,.who-tab img{
+  width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;font-size:12px;
+  background:linear-gradient(135deg,var(--app-accent),#38bdf8);color:#0b0714;font-weight:800;
+  object-fit:cover;
+}
+.who-tab:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.who-tab.active{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--app-accent) 28%,transparent),rgba(56,189,248,.22));
+  border-color:var(--app-accent);
+  box-shadow:0 0 22px -6px var(--app-accent);
+}
+.user-badge{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ub-name{font-size:13.5px;font-weight:700;color:#cfc6e8;white-space:nowrap}
+
+/* ================= ПРОФИЛЬ ================= */
+.profile{
+  --accent:#c084fc;--bg1:#241242;--bg2:#0a0713;--angle:140deg;
+  max-width:1180px;margin:20px auto 0;padding:0 18px;
+}
+.cover{
+  position:relative;height:250px;border-radius:var(--app-radius);overflow:hidden;
+  background:linear-gradient(var(--angle,140deg),var(--bg1),var(--bg2));
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 30px 70px -30px var(--accent);
+}
+.cover.pattern-dots::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:radial-gradient(circle, rgba(255,255,255,.2) 1px, transparent 1px);
+  background-size:22px 22px;
+}
+.cover.pattern-grid::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px);
+  background-size:34px 34px;
+}
+.cover-img{width:100%;height:100%;object-fit:cover;position:relative;z-index:0}
+.cover::after{
+  content:"";position:absolute;inset:0;z-index:2;
+  background:
+    radial-gradient(400px 200px at 15% 0%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 70%),
+    linear-gradient(to top, rgba(6,4,12,.75), transparent 60%);
+  pointer-events:none;
+}
+.cover-tools{
+  position:absolute;right:14px;top:14px;z-index:5;
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;
+}
+.chip{
+  padding:7px 13px;border-radius:999px;font-size:13px;font-weight:600;
+  background:rgba(10,7,19,.6);border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(10px);transition:.22s;
+}
+.chip:hover{background:rgba(255,255,255,.16);transform:translateY(-2px)}
+.stickers{position:absolute;inset:0;z-index:4;pointer-events:none}
+.sticker{
+  position:absolute;
+  font-size:clamp(26px,4.2vw,46px);
+  line-height:1;
+  animation:floatSticker 4s ease-in-out infinite;
+  filter:drop-shadow(0 8px 14px rgba(0,0,0,.6));
+  user-select:none;
+}
+@keyframes floatSticker{
+  0%,100%{transform:translateY(0) rotate(var(--rot,0deg)) scale(1)}
+  50%{transform:translateY(-16px) rotate(calc(var(--rot,0deg) + 10deg)) scale(1.1)}
+}
+.profile-body{
+  position:relative;z-index:6;
+  display:flex;align-items:flex-end;gap:18px;
+  margin:-58px 0 0;padding:0 18px;flex-wrap:wrap;
+}
+.avatar{
+  width:118px;height:118px;
+  border:4px solid #0b0714;
+  background:linear-gradient(140deg,var(--accent),var(--bg1));
+  display:grid;place-items:center;
+  font-size:42px;font-weight:800;color:#0b0714;
+  overflow:hidden;position:relative;
+  box-shadow:0 12px 36px -10px var(--accent);
+  transition:.25s;
+}
+.avatar.shape-circle{border-radius:50%}
+.avatar.shape-rounded{border-radius:30%}
+.avatar.shape-square{border-radius:14%}
+.avatar[data-act]{cursor:pointer}
+.avatar[data-act]:hover{transform:scale(1.05)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.who{flex:1;min-width:200px;padding-bottom:6px}
+.who h1{
+  font-size:29px;line-height:1.2;outline:none;
+  padding:2px 6px;border-radius:8px;transition:.2s;
+}
+.who h1:focus,.bio:focus{background:rgba(255,255,255,.07)}
+.bio{
+  margin-top:5px;color:var(--muted);font-size:14.5px;
+  outline:none;padding:3px 6px;border-radius:8px;max-width:560px;line-height:1.5;
+}
+.profile-actions{display:flex;gap:10px;padding-bottom:8px;flex-wrap:wrap}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 18px;border-radius:calc(var(--app-radius) * .7);font-size:14px;font-weight:700;
+  background:rgba(255,255,255,.07);border:1px solid var(--line);
+  transition:.22s;text-decoration:none;color:inherit;
+}
+.btn:hover{background:rgba(255,255,255,.15);transform:translateY(-2px)}
+.btn.primary{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;border:none;
+  box-shadow:0 10px 28px -10px var(--app-accent);
+}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn.small{padding:6px 12px;font-size:12.5px;border-radius:10px}
+.btn.danger{
+  background:rgba(251,113,133,.13);
+  border:1px solid rgba(251,113,133,.4);
+  color:#fda4af;
+}
+.btn.danger:hover{background:rgba(251,113,133,.28);border-color:#fb7185;color:#fff}
+
+/* ================= РАСКЛАДКА ================= */
+.layout{
+  max-width:1180px;margin:24px auto 0;padding:0 18px;
+  display:grid;grid-template-columns:310px 1fr;gap:18px;align-items:start;
+}
+.card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--app-radius);padding:16px;margin-bottom:16px;
+  backdrop-filter:blur(10px);
+}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card h3{font-size:15px;font-weight:700;letter-spacing:.3px}
+.badge{
+  font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
+  background:color-mix(in srgb,var(--app-accent) 20%,transparent);
+  color:color-mix(in srgb,var(--app-accent) 70%, #fff);
+  border:1px solid color-mix(in srgb,var(--app-accent) 30%,transparent);
+}
+
+/* треки */
+.track{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;
+  border-radius:12px;cursor:pointer;transition:.2s;
+  border:1px solid transparent;
+}
+.track:hover{background:rgba(255,255,255,.06)}
+.track.playing{background:color-mix(in srgb,var(--app-accent) 15%,transparent);border-color:color-mix(in srgb,var(--app-accent) 40%,transparent)}
+.track .play{
+  width:30px;height:30px;flex:0 0 30px;border-radius:50%;
+  display:grid;place-items:center;font-size:11px;
+  background:linear-gradient(135deg,var(--app-accent),#38bdf8);color:#0b0714;
+}
+.track.playing .play{animation:pulse 1.2s ease-in-out infinite}
+.track b{display:block;font-size:13.5px;font-weight:600}
+.track small{color:var(--muted);font-size:11.5px}
+
+/* друзья */
+.friend-list{display:flex;flex-direction:column;gap:6px}
+.friend{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:12px;cursor:pointer;transition:.2s;font-size:14px;font-weight:600;
+}
+.friend:hover{background:rgba(255,255,255,.07)}
+.mini-avatar{
+  width:32px;height:32px;border-radius:50%;flex:0 0 32px;
+  display:grid;place-items:center;font-size:13px;font-weight:800;color:#0b0714;
+  background:linear-gradient(135deg,var(--app-accent),#38bdf8);overflow:hidden;
+}
+.mini-avatar img{width:100%;height:100%;object-fit:cover}
+.friend.add{color:var(--app-accent);border:1px dashed color-mix(in srgb,var(--app-accent) 45%,transparent)}
+.friend.add span{width:32px;height:32px;display:grid;place-items:center;font-size:18px}
+
+/* подарки */
+.gift-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+.gift{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:10px 4px;border-radius:14px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  animation:giftIn .55s cubic-bezier(.2,1.5,.5,1) backwards;
+}
+.gift:nth-child(2){animation-delay:.06s}
+.gift:nth-child(3){animation-delay:.12s}
+.gift:nth-child(4){animation-delay:.18s}
+.gift:nth-child(5){animation-delay:.24s}
+.gift:nth-child(6){animation-delay:.3s}
+.gift-emoji{font-size:26px;animation:wiggle 2.6s ease-in-out infinite}
+.gift-name{font-size:10.5px;color:var(--muted);text-align:center}
+@keyframes wiggle{0%,100%{transform:rotate(-7deg) scale(1)}50%{transform:rotate(7deg) scale(1.08)}}
+@keyframes giftIn{from{transform:scale(0) rotate(-35deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+
+/* ================= КОНТЕНТ ================= */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{
+  padding:8px 15px;border-radius:999px;font-size:13px;font-weight:600;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  transition:.22s;color:var(--muted);
+}
+.tab:hover{color:#fff;background:rgba(255,255,255,.1)}
+.tab.active{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;border-color:transparent;
+  box-shadow:0 8px 22px -10px var(--app-accent);
+}
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.post{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);border-radius:calc(var(--app-radius) * .9);overflow:hidden;
+  animation:popIn .4s ease backwards;transition:.25s;
+  display:flex;flex-direction:column;
+}
+.post:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--app-accent) 40%,transparent);box-shadow:0 18px 40px -22px var(--app-accent)}
+@keyframes popIn{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+.post-media{background:#0a0713;display:flex;align-items:center;justify-content:center;min-height:0}
+.media{width:100%;max-height:320px;object-fit:cover;display:block}
+.audio{width:100%;padding:12px}
+.post-info{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.post-kind{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--app-accent)}
+.post-info h4{font-size:15px;font-weight:700;line-height:1.3}
+.post-text{
+  font-size:13.5px;color:#cbc5e0;line-height:1.65;
+  max-height:150px;overflow:auto;white-space:pre-wrap;
+  border-left:2px solid color-mix(in srgb,var(--app-accent) 40%,transparent);padding-left:10px;
+}
+.post-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:auto;padding-top:6px;font-size:11.5px;color:var(--muted);
+}
+.icon-btn{
+  width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  font-size:13px;opacity:.55;transition:.2s;
+}
+.icon-btn:hover{opacity:1;background:rgba(251,113,133,.18)}
+.empty{
+  grid-column:1/-1;text-align:center;padding:56px 20px;
+  border:1px dashed rgba(255,255,255,.14);border-radius:var(--app-radius);
+  color:var(--muted);
+}
+.empty .big{font-size:44px;margin-bottom:12px;animation:pulse 2.4s ease-in-out infinite}
+
+/* ================= PDF-ОБЛОЖКА ================= */
+.pdf-cover{
+  min-height:230px;
+  flex-direction:column;gap:10px;
+  padding:26px 18px;
+  background:
+    radial-gradient(300px 150px at 50% 0%, rgba(192,132,252,.18), transparent 70%),
+    linear-gradient(160deg, rgba(192,132,252,.08), rgba(56,189,248,.06));
+  border-bottom:1px solid rgba(255,255,255,.05);
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+  position:relative;
+}
+.pdf-cover:hover{
+  background:
+    radial-gradient(300px 150px at 50% 0%, rgba(192,132,252,.3), transparent 70%),
+    linear-gradient(160deg, rgba(192,132,252,.15), rgba(56,189,248,.1));
+}
+.pdf-cover::before{
+  content:"PDF";
+  position:absolute;top:10px;right:12px;
+  font-size:10px;font-weight:800;letter-spacing:1px;
+  padding:3px 8px;border-radius:6px;
+  background:rgba(251,113,133,.18);color:#fda4af;
+  border:1px solid rgba(251,113,133,.35);
+}
+.pdf-cover-icon{
+  font-size:54px;
+  filter:drop-shadow(0 10px 20px rgba(192,132,252,.5));
+  animation:pdfFloat 3.5s ease-in-out infinite;
+}
+@keyframes pdfFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+.pdf-cover-title{
+  font-size:16px;font-weight:700;color:#eae7f5;line-height:1.35;
+  max-width:100%;word-break:break-word;
+}
+.pdf-cover-hint{
+  font-size:11.5px;color:var(--muted);
+  max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ================= ЧИТАЛКА PDF ================= */
+.modal-card.pdf-modal-card{
+  width:min(1000px, 100%);
+  max-height:94vh;
+  padding:22px;
+  display:flex;flex-direction:column;
+}
+.pdf-viewer-wrap{
+  width:100%;
+  height:65vh;
+  min-height:300px;
+  max-height:620px;
+  background:#fff;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  margin-top:4px;
+}
+.pdf-viewer-frame{
+  width:100%;height:100%;
+  border:none;display:block;background:#fff;
+}
+
+/* ================= ЛЕНТА ================= */
+.feed-view{max-width:1180px;margin:24px auto 0;padding:0 18px}
+.feed-head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:20px;flex-wrap:wrap;
+}
+.feed-head h1{font-size:26px;font-weight:800;letter-spacing:.3px}
+.feed-count{
+  padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;
+  background:color-mix(in srgb,var(--app-accent) 15%,transparent);
+  border:1px solid color-mix(in srgb,var(--app-accent) 35%,transparent);
+  color:color-mix(in srgb,var(--app-accent) 70%, #fff);
+}
+.feed-post{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);border-radius:var(--app-radius);overflow:hidden;
+  animation:popIn .4s ease backwards;transition:.25s;
+  display:flex;flex-direction:column;
+}
+.feed-post:hover{border-color:color-mix(in srgb,var(--app-accent) 40%,transparent);box-shadow:0 18px 40px -22px var(--app-accent)}
+.feed-author{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;transition:.2s;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.feed-author:hover{background:rgba(255,255,255,.04)}
+.feed-author .mini-avatar{width:34px;height:34px;flex:0 0 34px;font-size:14px}
+.feed-author b{font-size:14px;font-weight:700;display:block}
+.feed-author small{font-size:11.5px;color:var(--muted)}
+.feed-author-time{margin-left:auto;font-size:11.5px;color:var(--muted);white-space:nowrap}
+
+/* комментарии */
+.feed-comments{
+  margin-top:10px;padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.comments-head{
+  font-size:12px;font-weight:700;color:var(--app-accent);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.comments-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.comment{
+  display:flex;flex-direction:column;gap:2px;
+  padding:8px 10px;border-radius:10px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.05);
+  animation:popIn .3s ease;
+}
+.comment b{font-size:12px;color:var(--app-accent);font-weight:700}
+.comment span{font-size:13px;color:#e0dbf0;line-height:1.4;word-break:break-word}
+.comment small{font-size:10.5px;color:var(--muted);margin-top:2px}
+.comment-form{display:flex;gap:8px}
+.comment-form input{
+  flex:1;padding:9px 12px;border-radius:10px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:var(--text);font-size:13px;outline:none;transition:.2s;
+}
+.comment-form input:focus{
+  border-color:var(--app-accent);background:color-mix(in srgb,var(--app-accent) 8%,transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--app-accent) 12%,transparent);
+}
+.comment-send{
+  padding:0 14px;border-radius:10px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,var(--app-accent),#38bdf8);color:#0b0714;
+  transition:.2s;
+}
+.comment-send:hover{filter:brightness(1.1);transform:translateX(1px)}
+.comments-empty{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px}
+
+/* ================= АНИМАЦИЯ ПОДАРКА ================= */
+.gift-reveal{
+  position:fixed;inset:0;z-index:3000;
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 50%, rgba(30,15,60,.9), rgba(5,3,12,.96));
+  backdrop-filter:blur(8px);
+  opacity:0;visibility:hidden;
+  transition:opacity .4s ease, visibility .4s;
+  pointer-events:none;
+}
+.gift-reveal.show{opacity:1;visibility:visible}
+.gift-reveal-content{
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:50px 40px;text-align:center;
+}
+.gift-reveal-content::before{
+  content:'';position:absolute;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb,var(--app-accent) 55%,transparent), transparent 70%);
+  animation:giftHalo 2s ease-in-out infinite;
+  z-index:0;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+}
+.gift-reveal-emoji{
+  position:relative;z-index:2;
+  font-size:130px;line-height:1;
+  animation:giftBounce .9s ease-in-out infinite;
+  filter:drop-shadow(0 20px 50px color-mix(in srgb,var(--app-accent) 85%,transparent));
+}
+.gift-reveal-title{
+  position:relative;z-index:2;
+  font-size:26px;font-weight:800;margin-top:6px;
+  background:linear-gradient(135deg,#c084fc,#38bdf8,#fb7185);
+  background-size:200% auto;
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  animation:shine 3s linear infinite;
+}
+.gift-reveal-name{position:relative;z-index:2;font-size:20px;font-weight:700;color:#fff}
+.gift-reveal-from{position:relative;z-index:2;font-size:14px;color:#b9a9e8;font-weight:600}
+.gift-reveal-spark{
+  position:absolute;
+  font-size:32px;z-index:3;
+  animation:sparkFloat 2s ease-in-out infinite;
+  filter:drop-shadow(0 4px 10px rgba(192,132,252,.6));
+}
+.gift-reveal-spark:nth-child(1){top:2%;left:12%;animation-delay:0s}
+.gift-reveal-spark:nth-child(2){top:18%;right:6%;animation-delay:.25s;font-size:26px}
+.gift-reveal-spark:nth-child(3){bottom:8%;left:6%;animation-delay:.5s;font-size:28px}
+.gift-reveal-spark:nth-child(4){bottom:4%;right:14%;animation-delay:.75s;font-size:34px}
+.gift-reveal-spark:nth-child(5){top:42%;left:0;animation-delay:1s;font-size:22px}
+.gift-reveal-spark:nth-child(6){top:42%;right:0;animation-delay:1.25s;font-size:24px}
+@keyframes giftBounce{
+  0%,100%{transform:translateY(0) rotate(-8deg) scale(1)}
+  50%{transform:translateY(-24px) rotate(8deg) scale(1.08)}
+}
+@keyframes giftHalo{
+  0%,100%{transform:translate(-50%,-50%) scale(.9);opacity:.6}
+  50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}
+}
+@keyframes sparkFloat{
+  0%,100%{transform:translateY(0) rotate(0);opacity:.4}
+  50%{transform:translateY(-16px) rotate(20deg);opacity:1}
+}
+
+/* ================= АВТОРИЗАЦИЯ ================= */
+.auth-backdrop{
+  position:fixed;inset:0;z-index:5000;
+  display:none;place-items:center;padding:20px;
+  background:radial-gradient(circle at 50% 30%, var(--app-bg2) 0%, var(--app-bg1) 70%);
+  overflow:auto;
+}
+.auth-backdrop.show{display:grid}
+.auth-card{
+  width:min(420px,100%);
+  background:linear-gradient(165deg,color-mix(in srgb,var(--app-bg2) 60%,#191129),color-mix(in srgb,var(--app-bg1) 80%,#0c0818));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--app-radius);padding:30px 26px;
+  box-shadow:0 30px 80px -30px var(--app-accent);
+  animation:popIn .4s ease;
+}
+.auth-brand{
+  text-align:center;font-size:22px;font-weight:800;letter-spacing:2px;margin-bottom:22px;
+  background:linear-gradient(90deg,#c084fc,#38bdf8,#fb7185);
+  background-size:200% auto;-webkit-background-clip:text;background-clip:text;
+  color:transparent;animation:shine 6s linear infinite;
+}
+.auth-tabs{
+  display:flex;gap:6px;margin-bottom:20px;
+  background:rgba(255,255,255,.05);border-radius:14px;padding:5px;
+}
+.auth-tab{
+  flex:1;padding:9px 6px;border-radius:10px;font-size:12.5px;font-weight:700;
+  color:var(--muted);transition:.2s;
+}
+.auth-tab:hover{color:#fff}
+.auth-tab.active{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;box-shadow:0 6px 18px -8px var(--app-accent);
+}
+.auth-submit{width:100%;margin-top:6px;padding:13px;font-size:15px}
+.auth-hint{margin-top:14px;text-align:center;font-size:12.5px}
+.auth-err{color:#fb7185;font-size:13px;min-height:18px;margin:4px 0 8px;font-weight:600}
+
+/* ================= МОДАЛКИ ================= */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(5,3,12,.78);backdrop-filter:blur(8px);
+  display:none;place-items:center;padding:20px;overflow:auto;
+}
+.modal-backdrop.show{display:grid}
+.modal-card{
+  width:min(600px,100%);
+  background:linear-gradient(165deg,#191129,#0c0818);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--app-radius);padding:26px;position:relative;
+  animation:popIn .3s ease;
+  max-height:88vh;overflow:auto;
+}
+.modal-card h2{font-size:20px;margin-bottom:16px}
+.close{
+  position:absolute;right:14px;top:14px;
+  width:34px;height:34px;border-radius:50%;font-size:15px;
+  background:rgba(255,255,255,.07);transition:.2s;
+  z-index:2;
+}
+.close:hover{background:rgba(251,113,133,.28);transform:rotate(90deg)}
+.section-title{
+  font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;
+  color:var(--app-accent);margin:20px 0 10px;
+}
+.field{display:block;margin-bottom:14px;font-size:13px;font-weight:600;color:var(--muted)}
+.field input,.field textarea{
+  width:100%;margin-top:7px;padding:12px 14px;
+  border-radius:13px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:var(--text);
+  font-size:14px;outline:none;transition:.2s;resize:vertical;
+}
+.field input:focus,.field textarea:focus{
+  border-color:var(--app-accent);background:color-mix(in srgb,var(--app-accent) 8%,transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--app-accent) 14%,transparent);
+}
+input[type="color"]{
+  width:100%;height:44px;padding:4px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);cursor:pointer;
+}
+input[type="range"]{
+  width:100%;margin-top:8px;accent-color:var(--app-accent);cursor:pointer;
+}
+.file-drop{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:26px 16px;border-radius:16px;cursor:pointer;
+  border:2px dashed color-mix(in srgb,var(--app-accent) 40%,transparent);
+  background:color-mix(in srgb,var(--app-accent) 6%,transparent);
+  font-size:14px;color:#cbb6f5;text-align:center;transition:.2s;
+}
+.file-drop:hover{background:color-mix(in srgb,var(--app-accent) 14%,transparent);border-color:var(--app-accent)}
+.file-drop.pdf{padding:40px 16px;font-size:15px;flex-direction:column;gap:10px}
+.file-drop.pdf .pdf-ico{font-size:44px;animation:pdfFloat 3.5s ease-in-out infinite}
+.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.pick{
+  aspect-ratio:1;border-radius:16px;font-size:26px;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  transition:.2s;
+}
+.pick:hover{
+  transform:scale(1.14) rotate(-5deg);
+  background:color-mix(in srgb,var(--app-accent) 22%,transparent);
+  border-color:var(--app-accent);
+  box-shadow:0 10px 26px -12px var(--app-accent);
+}
+.pick.wide{aspect-ratio:auto;padding:16px;font-size:15px;font-weight:700}
+.type-grid{grid-template-columns:1fr 1fr}
+.preset-row{display:flex;gap:8px;flex-wrap:wrap}
+.preset{
+  padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);transition:.2s;
+}
+.preset:hover{transform:translateY(-2px);background:rgba(255,255,255,.13)}
+.preset.active{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;border-color:transparent;
+  box-shadow:0 6px 18px -8px var(--app-accent);
+}
+.option-row{display:flex;gap:8px;flex-wrap:wrap}
+.opt{
+  padding:9px 14px;border-radius:12px;font-size:12.5px;font-weight:700;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);transition:.2s;
+}
+.opt:hover{background:rgba(255,255,255,.13);transform:translateY(-1px)}
+.opt.active{
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;border-color:transparent;
+  box-shadow:0 6px 18px -8px var(--app-accent);
+}
+
+/* ================= ТОСТ ================= */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,26px);
+  padding:13px 24px;border-radius:14px;font-size:14px;font-weight:600;
+  background:linear-gradient(135deg,var(--app-accent),color-mix(in srgb,var(--app-accent) 50%, #38bdf8));
+  color:#0b0714;
+  box-shadow:0 18px 44px -14px var(--app-accent);
+  opacity:0;transition:.35s cubic-bezier(.2,1.3,.5,1);z-index:4000;pointer-events:none;
+  max-width:calc(100vw - 40px);text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ================= АДАПТИВ ================= */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .side{order:2}
+  .cover{height:190px}
+  .avatar{width:92px;height:92px;font-size:32px}
+  .who h1{font-size:23px}
+  .profile-body{margin-top:-46px}
+  .who-tabs{justify-content:flex-start;order:4;flex-basis:100%}
+  .top-nav{order:2}
+  .gift-reveal-emoji{font-size:100px}
+  .gift-reveal-title{font-size:22px}
+  .pdf-viewer-wrap{height:60vh}
+}
+@media (max-width:600px){
+  .topbar{padding:10px 14px;gap:10px}
+  .posts{grid-template-columns:1fr}
+  .cover-tools{right:8px;top:8px}
+  .chip{font-size:11.5px;padding:6px 10px}
+  .auth-card{padding:24px 18px}
+  .feed-head h1{font-size:22px}
+  .gift-reveal-emoji{font-size:80px}
+  .gift-reveal-title{font-size:20px}
+  .gift-reveal-content{padding:30px 20px}
+  .pdf-viewer-wrap{height:55vh;min-height:240px}
+  .pdf-cover-icon{font-size:44px}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= ЗАГРУЗКА ================= -->
+<div id="loader">
+  <div class="loader-box">
+    <div class="loader-core">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="emoji">✦</div>
+    </div>
+    <div class="loader-text">Загрузка мира</div>
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- ================= АВТОРИЗАЦИЯ ================= -->
+<div class="auth-backdrop" id="auth">
+  <div class="auth-card">
+    <div class="auth-brand">✦ МОЙ МИР</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-tab="login">Вход</button>
+      <button class="auth-tab" data-auth-tab="observer">Наблюдатель</button>
+    </div>
+    <div id="authBody"></div>
+  </div>
+</div>
+
+<!-- ================= ТОПБАР ================= -->
+<header class="topbar">
+  <div class="brand">✦ МОЙ МИР</div>
+  <nav class="top-nav">
+    <button class="nav-btn" data-act="go-profile">🏠 Профиль</button>
+    <button class="nav-btn" data-act="go-feed">📰 Лента</button>
+  </nav>
+  <div class="who-tabs" id="whoTabs"></div>
+  <div class="user-badge" id="userBadge"></div>
+</header>
+
+<!-- ================= ПРИЛОЖЕНИЕ ================= -->
+<div id="view"></div>
+
+<!-- ================= СЛУЖЕБНОЕ ================= -->
+<div class="modal-backdrop" id="modal"></div>
+<input type="file" id="filePicker" hidden>
+<audio id="player" hidden></audio>
+
+<script>
+/* ==========================================================
+   КОНСТАНТЫ
+   ========================================================== */
+const LS_KEY = 'myworld_v5';
+const HARDCODED_LOGIN = 'westic';
+const HARDCODED_PASS  = 'cotvmes';
+
+const TYPE_LABELS = {
+  photo:'📷 Фото', video:'🎬 Видео', music:'🎵 Музыка',
+  poem:'📝 Стих', book:'📚 Книга', pdf:'📄 PDF-книга'
+};
+const TYPE_ACCEPT = {
+  photo:'image/*', video:'video/*', music:'audio/*', pdf:'application/pdf'
+};
+
+const STICKERS = ['🐱','🌈','⭐','🔥','🍀','🦋','🍩','👑','🎈','💜','🌸','🐉','🍕','🎧','☄️','🐸','🦄','🍭','🌙','💫'];
+
+const GIFTS = [
+  {emoji:'🌹', name:'Роза'},{emoji:'💐', name:'Букет'},{emoji:'🌷', name:'Тюльпан'},
+  {emoji:'🌸', name:'Сакура'},{emoji:'🌻', name:'Подсолнух'},{emoji:'🎂', name:'Тортик'},
+  {emoji:'🧁', name:'Капкейк'},{emoji:'🍰', name:'Кусочек'},{emoji:'🍫', name:'Шоколад'},
+  {emoji:'🍬', name:'Конфета'},{emoji:'🍩', name:'Пончик'},{emoji:'🍕', name:'Пицца'},
+  {emoji:'🧸', name:'Мишка'},{emoji:'🐻', name:'Медвежонок'},{emoji:'🦄', name:'Единорог'},
+  {emoji:'🐱', name:'Котик'},{emoji:'🐶', name:'Пёсик'},{emoji:'💎', name:'Алмаз'},
+  {emoji:'💍', name:'Кольцо'},{emoji:'👑', name:'Корона'},{emoji:'🏆', name:'Кубок'},
+  {emoji:'🥇', name:'Медаль'},{emoji:'🍾', name:'Шампанское'},{emoji:'🍷', name:'Вино'},
+  {emoji:'🥂', name:'Бокал'},{emoji:'🎁', name:'Подарок'},{emoji:'🎀', name:'Бантик'},
+  {emoji:'🎈', name:'Шарик'},{emoji:'🎉', name:'Хлопушка'},{emoji:'🎸', name:'Гитара'},
+  {emoji:'🎹', name:'Пианино'},{emoji:'🎧', name:'Наушники'},{emoji:'📚', name:'Книга'},
+  {emoji:'🌟', name:'Звезда'},{emoji:'⭐', name:'Звёздочка'},{emoji:'🌈', name:'Радуга'},
+  {emoji:'☀️', name:'Солнце'},{emoji:'🌙', name:'Луна'},{emoji:'🦋', name:'Бабочка'},
+  {emoji:'🔥', name:'Огонь'},{emoji:'💖', name:'Сердечко'}
+];
+
+const PRESETS = [
+  {name:'Неон',    accent:'#c084fc', bg1:'#2a1650', bg2:'#0a0713', angle:140},
+  {name:'Океан',   accent:'#38bdf8', bg1:'#0b2a3d', bg2:'#07121c', angle:140},
+  {name:'Закат',   accent:'#fb7185', bg1:'#3d1224', bg2:'#140610', angle:140},
+  {name:'Лес',     accent:'#4ade80', bg1:'#10301f', bg2:'#06120b', angle:140},
+  {name:'Золото',  accent:'#fbbf24', bg1:'#33260a', bg2:'#120d03', angle:140},
+  {name:'Роза',    accent:'#f472b6', bg1:'#3b1a2a', bg2:'#140810', angle:160},
+  {name:'Космос',  accent:'#818cf8', bg1:'#1e1b4b', bg2:'#020617', angle:180},
+  {name:'Лаванда', accent:'#a78bfa', bg1:'#2e1065', bg2:'#0f0524', angle:120}
+];
+
+const APP_PRESETS = [
+  {id:'neon',    name:'Неон',      accent:'#c084fc', bg1:'#06040c', bg2:'#241242', bg3:'#0d2a3d', calm:false},
+  {id:'calm',    name:'Спокойный', accent:'#8ba3c7', bg1:'#0f1115', bg2:'#151922', bg3:'#181c26', calm:true},
+  {id:'night',   name:'Ночной',    accent:'#64748b', bg1:'#05070d', bg2:'#0f172a', bg3:'#131c33', calm:false},
+  {id:'minimal', name:'Минимал',   accent:'#a3a3a3', bg1:'#0f0f0f', bg2:'#1a1a1a', bg3:'#161616', calm:true},
+  {id:'warm',    name:'Тёплый',    accent:'#d4a373', bg1:'#1a120c', bg2:'#2a1e14', bg3:'#241a12', calm:false},
+  {id:'cool',    name:'Холодный',  accent:'#7dd3fc', bg1:'#0a1018', bg2:'#0f1c2e', bg3:'#132238', calm:false}
+];
+
+const FONTS = [
+  {id:'ui',      name:'Современный', stack:'"Segoe UI", system-ui, -apple-system, sans-serif'},
+  {id:'serif',   name:'Классика',    stack:'Georgia, "Times New Roman", serif'},
+  {id:'mono',    name:'Моно',        stack:'"Courier New", monospace'},
+  {id:'rounded', name:'Округлый',    stack:'"Trebuchet MS", "Segoe UI", sans-serif'}
+];
+const TRANSLIT = {
+  а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',
+  н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',
+  ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'
+};
+
+/* ==========================================================
+   ХЕЛПЕРЫ
+   ========================================================== */
+const $  = (s, r=document) => r.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+
+function hash(str){
+  let h = 5381;
+  for(let i=0;i<str.length;i++) h = (((h*33) ^ str.charCodeAt(i)) >>> 0);
+  return h.toString(36);
+}
+function translit(str){
+  return String(str || '').toLowerCase().split('').map(c => TRANSLIT[c] ?? c).join('');
+}
+function plural(n, a, b, c){
+  const n10 = n % 10, n100 = n % 100;
+  if(n10 === 1 && n100 !== 11) return a;
+  if(n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return b;
+  return c;
+}
+
+/* ==========================================================
+   НАСТРОЙКИ ПРИЛОЖЕНИЯ
+   ========================================================== */
+function defaultAppSettings(){
+  return {
+    theme:'neon', accent:'#c084fc',
+    bg1:'#06040c', bg2:'#241242', bg3:'#0d2a3d',
+    font:'ui', radius:20, density:'normal', calm:false
+  };
+}
+function applyAppSettings(s){
+  s = s || state.appSettings || defaultAppSettings();
+  const r = document.documentElement;
+  r.style.setProperty('--app-accent', s.accent || '#c084fc');
+  r.style.setProperty('--app-bg1', s.bg1 || '#06040c');
+  r.style.setProperty('--app-bg2', s.bg2 || '#241242');
+  r.style.setProperty('--app-bg3', s.bg3 || '#0d2a3d');
+  r.style.setProperty('--app-radius', (s.radius ?? 20) + 'px');
+  const font = (FONTS.find(f => f.id === s.font) || FONTS[0]).stack;
+  r.style.setProperty('--app-font', font);
+  document.body.classList.toggle('calm', !!s.calm);
+  document.body.classList.toggle('density-compact', s.density === 'compact');
+}
+
+/* ==========================================================
+   СОСТОЯНИЕ
+   ========================================================== */
+function defaultTheme(){
+  return { accent:'#c084fc', bg1:'#2a1650', bg2:'#0a0713', angle:140, font:'ui', avatarShape:'circle', pattern:'none' };
+}
+function defaultState(){
+  return {
+    session: null,
+    current: 'westic',
+    view: 'profile',
+    appSettings: defaultAppSettings(),
+    profiles: {
+      westic: {
+        id:'westic', login: HARDCODED_LOGIN, passHash: hash(HARDCODED_PASS),
+        name:'Westic', bio:'Хозяин этого мира ✨',
+        avatar:null, cover:null,
+        theme: defaultTheme(),
+        friends:[], stickers:[], gifts:[], posts:[]
+      }
+    }
+  };
+}
+function normalize(st){
+  const def = defaultState();
+  if(!st || typeof st !== 'object' || !st.profiles) return def;
+
+  if(st.profiles.danya) delete st.profiles.danya;
+  if(!st.profiles.westic) st.profiles.westic = def.profiles.westic;
+  st.appSettings = Object.assign(defaultAppSettings(), st.appSettings || {});
+
+  for(const id in st.profiles){
+    const p = st.profiles[id];
+    p.id = id;
+    if(typeof p.login !== 'string') p.login = null;
+    if(!('passHash' in p)) p.passHash = null;
+    p.theme = Object.assign(defaultTheme(), p.theme || {});
+    p.friends  = Array.isArray(p.friends)  ? p.friends  : [];
+    p.stickers = Array.isArray(p.stickers) ? p.stickers : [];
+    p.gifts    = Array.isArray(p.gifts)    ? p.gifts    : [];
+    p.posts    = Array.isArray(p.posts)    ? p.posts    : [];
+    for(const post of p.posts){
+      if(!Array.isArray(post.comments)) post.comments = [];
+    }
+  }
+
+  if(st.profiles.westic){
+    st.profiles.westic.login = HARDCODED_LOGIN;
+    st.profiles.westic.passHash = hash(HARDCODED_PASS);
+  }
+
+  if(st.session){
+    if(st.session.observer){ /* ок */ }
+    else if(st.session.userId && st.profiles[st.session.userId]){ /* ок */ }
+    else st.session = null;
+  } else st.session = null;
+
+  if(!st.view) st.view = 'profile';
+  if(!st.current || !st.profiles[st.current]) st.current = 'westic';
+  return st;
+}
+
+let state;
+try {
+  const raw = localStorage.getItem(LS_KEY);
+  state = normalize(raw ? JSON.parse(raw) : null);
+} catch(e){
+  state = defaultState();
+}
+function save(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ /* переполнение — живём в памяти */ }
+}
+
+/* ==========================================================
+   ПРАВА
+   ========================================================== */
+function currentUser(){
+  if(!state.session || state.session.observer) return null;
+  return state.profiles[state.session.userId] || null;
+}
+function isOwnerCurrent(){
+  const u = currentUser();
+  return !!u && state.current === u.id;
+}
+function visibleProfiles(){
+  if(!state.session) return [];
+  if(state.session.observer) return Object.values(state.profiles);
+  const me = state.profiles[state.session.userId];
+  if(!me) return [];
+  const ids = [me.id, ...me.friends];
+  const seen = new Set(), out = [];
+  for(const id of ids){
+    if(seen.has(id)) continue;
+    seen.add(id);
+    const p = state.profiles[id];
+    if(p) out.push(p);
+  }
+  return out;
+}
+function loginTaken(login, exceptId){
+  return Object.values(state.profiles).some(p => p.login === login && p.id !== exceptId);
+}
+function suggestLogin(name){
+  const base = (translit(name).replace(/[^a-z0-9]/g,'') || 'friend').slice(0,20);
+  let login = base, i = 2;
+  while(loginTaken(login)){ login = base + i++; }
+  return login;
+}
+
+/* ==========================================================
+   ТОСТ
+   ========================================================== */
+let toastTimer;
+function toast(msg){
+  let t = $('.toast');
+  if(!t){ t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ==========================================================
+   АНИМАЦИЯ ПОДАРКА
+   ========================================================== */
+function showGiftReveal(emoji, name, from, targetName, isSelf){
+  const overlay = document.createElement('div');
+  overlay.className = 'gift-reveal';
+  const title = isSelf ? 'Вам подарили!' : 'Подарок для ' + targetName;
+  const sparks = ['✨','🌟','⭐','💫','✨','🌟'];
+  overlay.innerHTML = `
+    <div class="gift-reveal-content">
+      ${sparks.map(s => `<span class="gift-reveal-spark">${s}</span>`).join('')}
+      <div class="gift-reveal-emoji">${emoji}</div>
+      <div class="gift-reveal-title">${esc(title)}</div>
+      <div class="gift-reveal-name">${esc(name)}</div>
+      <div class="gift-reveal-from">от ${esc(from)}</div>
+    </div>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('show'));
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    setTimeout(() => overlay.remove(), 500);
+  }, 2400);
+}
+
+/* ==========================================================
+   АВТОРИЗАЦИЯ
+   ========================================================== */
+function showAuth(tab='login'){
+  $('#auth').classList.add('show');
+  renderAuthTab(tab);
+}
+function hideAuth(){ $('#auth').classList.remove('show'); }
+function authError(msg){
+  const el = $('#authErr');
+  if(el) el.textContent = msg;
+}
+function renderAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.authTab === tab));
+  const body = $('#authBody');
+  if(tab === 'login'){
+    body.innerHTML = `
+      <label class="field">Логин
+        <input id="l-login" autocomplete="username" placeholder="Твой логин">
+      </label>
+      <label class="field">Пароль
+        <input id="l-pass" type="password" autocomplete="current-password" placeholder="••••••">
+      </label>
+      <div class="auth-err" id="authErr"></div>
+      <button class="btn primary auth-submit" data-act="do-login">Войти</button>
+      <p class="muted auth-hint">Аккаунты для друзей создаёт Westic в профиле друга.</p>
+    `;
+  } else {
+    body.innerHTML = `
+      <p class="muted" style="margin-bottom:18px">
+        Режим наблюдателя — можно смотреть всё творчество и слушать музыку,
+        но нельзя публиковать, менять оформление и дарить подарки.
+      </p>
+      <button class="btn primary auth-submit" data-act="do-observer">👀 Войти как наблюдатель</button>
+    `;
+  }
+  setTimeout(() => body.querySelector('input')?.focus(), 50);
+}
+function doLogin(){
+  const login = ($('#l-login').value || '').trim().toLowerCase();
+  const pass  = $('#l-pass').value || '';
+  if(!login || !pass){ authError('Заполни логин и пароль'); return; }
+  const p = Object.values(state.profiles).find(x => x.login === login && x.passHash);
+  if(!p || p.passHash !== hash(pass)){ authError('Неверный логин или пароль'); return; }
+  state.session = { userId: p.id };
+  state.current = p.id;
+  state.view = 'profile';
+  filter = 'all';
+  save(); hideAuth(); window.scrollTo({top:0}); render();
+  toast('С возвращением, ' + p.name + '!');
+}
+function doObserver(){
+  state.session = { observer: true };
+  const keys = Object.keys(state.profiles);
+  state.current = keys.includes('westic') ? 'westic' : (keys[0] || null);
+  state.view = 'feed';
+  filter = 'all';
+  save(); hideAuth(); window.scrollTo({top:0}); render();
+  toast('Режим наблюдателя 👀');
+}
+function doLogout(){
+  state.session = null;
+  state.current = 'westic';
+  state.view = 'profile';
+  save(); render();
+  showAuth('login');
+  toast('Вы вышли');
+}
+
+/* ==========================================================
+   УДАЛЕНИЕ АККАУНТА
+   ========================================================== */
+function openDeleteAccount(profileId){
+  const p = state.profiles[profileId];
+  if(!p) return;
+  const u = currentUser();
+  const isSelf = !!u && u.id === profileId;
+  if(isSelf){
+    modal.innerHTML = `
+      <div class="modal-card">
+        <button class="close" data-act="close-modal">✕</button>
+        <h2>⚠️ Удалить аккаунт</h2>
+        <p class="muted" style="margin-bottom:18px">
+          Это <b>полностью сбросит все данные</b>: профили, публикации, подарки, стикеры,
+          оформление и аккаунты друзей. Восстановить будет невозможно.
+        </p>
+        <div class="option-row" style="justify-content:flex-end">
+          <button class="btn" data-act="close-modal">Отмена</button>
+          <button class="btn danger" data-act="confirm-delete-account" data-id="${profileId}">
+            🗑 Да, удалить всё
+          </button>
+        </div>
+      </div>`;
+  } else {
+    modal.innerHTML = `
+      <div class="modal-card">
+        <button class="close" data-act="close-modal">✕</button>
+        <h2>⚠️ Удалить аккаунт друга</h2>
+        <p class="muted" style="margin-bottom:18px">
+          Друг «${esc(p.name)}» больше не сможет войти под своим логином и паролем.
+          Профиль и публикации останутся — можно будет создать новый аккаунт позже.
+        </p>
+        <div class="option-row" style="justify-content:flex-end">
+          <button class="btn" data-act="close-modal">Отмена</button>
+          <button class="btn danger" data-act="confirm-delete-account" data-id="${profileId}">
+            🗑 Удалить аккаунт
+          </button>
+        </div>
+      </div>`;
+  }
+  modal.classList.add('show');
+}
+function confirmDeleteAccount(profileId){
+  const p = state.profiles[profileId];
+  if(!p) return;
+  const u = currentUser();
+  const isSelf = !!u && u.id === profileId;
+  if(isSelf){
+    try { localStorage.removeItem(LS_KEY); } catch(e){}
+    state = defaultState();
+    save(); closeModal();
+    filter = 'all';
+    applyAppSettings(state.appSettings);
+    render();
+    showAuth('login');
+    toast('Аккаунт удалён. Все данные сброшены.');
+  } else {
+    p.login = null;
+    p.passHash = null;
+    save(); closeModal(); render();
+    toast('Аккаунт «' + p.name + '» удалён');
+  }
+}
+
+/* ==========================================================
+   ФАЙЛЫ
+   ========================================================== */
+function readFile(file){
+  return new Promise(resolve => {
+    if(file.size < 3 * 1024 * 1024){
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => resolve(URL.createObjectURL(file));
+      r.readAsDataURL(file);
+    } else {
+      resolve(URL.createObjectURL(file));
+    }
+  });
+}
+let pickerCallback = null;
+function pickFile(accept, cb){
+  const inp = $('#filePicker');
+  inp.value = '';
+  inp.accept = accept;
+  pickerCallback = cb;
+  inp.click();
+}
+$('#filePicker').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if(!f || !pickerCallback) return;
+  readFile(f).then(url => pickerCallback(url));
+});
+
+/* ==========================================================
+   ПЛЕЕР
+   ========================================================== */
+const player = $('#player');
+let playingId = null;
+player.addEventListener('play',  () => syncTracks());
+player.addEventListener('pause', () => syncTracks());
+player.addEventListener('ended', () => { playingId = null; syncTracks(); });
+
+function playTrack(id, src){
+  if(playingId === id){
+    player.paused ? player.play().catch(()=>{}) : player.pause();
+  } else {
+    playingId = id;
+    player.src = src;
+    player.play().catch(()=>toast('Не удалось воспроизвести 😕'));
+  }
+  syncTracks();
+}
+function syncTracks(){
+  document.querySelectorAll('.track').forEach(el => {
+    const active = el.dataset.id === playingId && !player.paused;
+    el.classList.toggle('playing', active);
+    const icon = el.querySelector('.play');
+    if(icon) icon.textContent = active ? '❚❚' : '▶';
+  });
+}
+
+/* ==========================================================
+   РЕНДЕР
+   ========================================================== */
+let filter = 'all';
+let tempTheme = null;
+let tempAppSettings = null;
+
+function renderUserBadge(){
+  const el = $('#userBadge');
+  if(!state.session){ el.innerHTML = ''; return; }
+  const settingsBtn = `<button class="btn small" data-act="open-app-settings" title="Настройки интерфейса">⚙️</button>`;
+  if(state.session.observer){
+    el.innerHTML = `${settingsBtn}
+      <span class="ub-name">👀 Наблюдатель</span>
+      <button class="btn small" data-act="logout">Выйти</button>`;
+  } else {
+    const me = state.profiles[state.session.userId];
+    el.innerHTML = `${settingsBtn}
+      <span class="ub-name">${esc(me?.name || '')}</span>
+      <button class="btn small" data-act="logout">Выйти</button>`;
+  }
+}
+function renderTopNav(){
+  const navProfile = $('[data-act="go-profile"]');
+  const navFeed = $('[data-act="go-feed"]');
+  if(navProfile) navProfile.classList.toggle('active', state.view !== 'feed');
+  if(navFeed) navFeed.classList.toggle('active', state.view === 'feed');
+  const whoTabs = $('#whoTabs');
+  if(whoTabs) whoTabs.style.display = state.view === 'feed' ? 'none' : '';
+}
+function render(){
+  renderUserBadge();
+  renderTopNav();
+  if(state.view === 'feed'){ renderFeed(); } else { renderProfile(); }
+  renderWhoTabs();
+}
+
+/* ==========================================================
+   ЛЕНТА
+   ========================================================== */
+function collectFeed(){
+  const profs = visibleProfiles();
+  const all = [];
+  for(const p of profs){
+    for(const post of p.posts){
+      all.push({ post, profile: p });
+    }
+  }
+  all.sort((a,b) => b.post.date - a.post.date);
+  return all;
+}
+function renderFeed(){
+  const items = collectFeed();
+  const view = $('#view');
+  if(!items.length){
+    view.innerHTML = `
+      <section class="feed-view">
+        <div class="feed-head">
+          <div><h1>📰 Лента</h1><p class="muted">Свежие публикации со всех страниц</p></div>
+          <span class="feed-count">0 публикаций</span>
+        </div>
+        <div class="empty">
+          <div class="big">🌌</div>
+          <p>Пока нет публикаций.</p>
+          <p class="muted" style="margin-top:6px">Добавь что-нибудь в своём профиле — и это появится здесь.</p>
+        </div>
+      </section>`;
+    return;
+  }
+  view.innerHTML = `
+    <section class="feed-view">
+      <div class="feed-head">
+        <div><h1>📰 Лента</h1><p class="muted">Свежие публикации со всех страниц</p></div>
+        <span class="feed-count">${items.length} ${plural(items.length,'публикация','публикации','публикаций')}</span>
+      </div>
+      <div class="posts">
+        ${items.map(feedPostHTML).join('')}
+      </div>
+    </section>`;
+}
+function feedPostHTML({ post, profile }){
+  let media = '';
+  if(post.type === 'photo' && post.src){
+    media = `<div class="post-media"><img class="media" src="${post.src}" alt="${esc(post.title)}" loading="lazy"></div>`;
+  } else if(post.type === 'video' && post.src){
+    media = `<div class="post-media"><video class="media" src="${post.src}" controls preload="metadata"></video></div>`;
+  } else if(post.type === 'music' && post.src){
+    media = `<div class="post-media"><audio class="audio" src="${post.src}" controls preload="none"></audio></div>`;
+  } else if(post.type === 'pdf' && post.src){
+    media = pdfCoverHTML(post, profile.id);
+  }
+  const text = (post.type === 'poem' || post.type === 'book') && post.text
+    ? `<div class="post-text">${esc(post.text)}</div>` : '';
+
+  const comments = Array.isArray(post.comments) ? post.comments : [];
+  const commentsBlock = `
+    <div class="feed-comments">
+      <div class="comments-head">
+        💬 ${comments.length} ${plural(comments.length,'комментарий','комментария','комментариев')}
+      </div>
+      ${comments.length
+        ? `<div class="comments-list">
+             ${comments.map(c => `
+               <div class="comment">
+                 <b>${esc(c.author)}</b>
+                 <span>${esc(c.text)}</span>
+                 <small>${dateStr(c.date)}</small>
+               </div>`).join('')}
+           </div>`
+        : `<div class="comments-empty">Пока никто не комментировал — будь первым</div>`}
+      ${state.session
+        ? `<form class="comment-form" data-post-id="${post.id}" data-profile-id="${profile.id}">
+             <input type="text" placeholder="Написать комментарий..." maxlength="300" autocomplete="off">
+             <button type="submit" class="comment-send" title="Отправить">➤</button>
+           </form>`
+        : ``}
+    </div>`;
+
+  return `
+    <article class="feed-post">
+      <div class="feed-author" data-act="switch" data-id="${profile.id}">
+        <div class="mini-avatar">${profile.avatar ? `<img src="${profile.avatar}" alt="">` : esc(profile.name.trim()[0] || '?')}</div>
+        <div><b>${esc(profile.name)}</b><small>${TYPE_LABELS[post.type] || ''}</small></div>
+        <span class="feed-author-time">${dateStr(post.date)}</span>
+      </div>
+      ${media}
+      <div class="post-info">
+        <h4>${esc(post.title)}</h4>
+        ${text}
+        ${commentsBlock}
+      </div>
+    </article>`;
+}
+
+/* ==========================================================
+   ПРОФИЛЬ
+   ========================================================== */
+function renderProfile(){
+  const p = state.profiles[state.current];
+  if(!p){
+    $('#view').innerHTML = `
+      <div class="empty" style="max-width:600px;margin:40px auto">
+        <div class="big">🌌</div><p>Пока никого нет.</p>
+      </div>`;
+    return;
+  }
+
+  const user  = currentUser();
+  const owner = !!user && user.id === p.id;
+  const theme = p.theme;
+  const fontStack = (FONTS.find(f => f.id === theme.font) || FONTS[0]).stack;
+  const coverClass = 'cover' + (theme.pattern && theme.pattern !== 'none' ? ' pattern-' + theme.pattern : '');
+  const avatarShape = theme.avatarShape || 'circle';
+
+  const friends = p.friends.map(id => state.profiles[id]).filter(Boolean);
+  const music   = p.posts.filter(x => x.type === 'music');
+  const shown   = p.posts.filter(x => filter === 'all' || x.type === filter);
+
+  const tools = [];
+  if(owner){
+    tools.push(`<button class="chip" data-act="pick-cover">🖼 Фон</button>`);
+    tools.push(`<button class="chip" data-act="theme">🎨 Оформление</button>`);
+  }
+  if(user){
+    tools.push(`<button class="chip" data-act="stickers">😺 Стикер</button>`);
+    tools.push(`<button class="chip" data-act="gifts">🎁 Подарок</button>`);
+  }
+
+  let actions = '';
+  if(owner){
+    actions = `
+      <button class="btn primary" data-act="upload">➕ Добавить</button>
+      <button class="btn" data-act="add-friend">👥 Добавить друга</button>
+      <button class="btn danger" data-act="delete-account" data-id="${p.id}">🗑 Удалить аккаунт</button>`;
+  } else if(user && user.friends.includes(p.id)){
+    if(!p.passHash){
+      actions = `<button class="btn primary" data-act="create-friend-account">🔑 Создать аккаунт для друга</button>`;
+    } else {
+      actions = `<button class="btn danger" data-act="delete-account" data-id="${p.id}">🗑 Удалить аккаунт друга</button>`;
+    }
+  }
+
+  $('#view').innerHTML = `
+    <section class="profile" style="
+      --accent:${theme.accent}; --bg1:${theme.bg1}; --bg2:${theme.bg2};
+      --angle:${theme.angle || 140}deg; font-family:${fontStack};">
+      <div class="${coverClass}">
+        ${p.cover ? `<img class="cover-img" src="${p.cover}" alt="">` : ''}
+        <div class="stickers">${p.stickers.map(stickerHTML).join('')}</div>
+        <div class="cover-tools">${tools.join('')}</div>
+      </div>
+
+      <div class="profile-body">
+        <div class="avatar shape-${avatarShape}" ${owner ? 'data-act="pick-avatar" title="Сменить аватар"' : ''}>
+          ${p.avatar ? `<img src="${p.avatar}" alt="">` : `<span>${esc((p.name.trim()[0] || '?'))}</span>`}
+        </div>
+        <div class="who">
+          <h1 ${owner ? 'contenteditable="true" spellcheck="false"' : ''} data-field="name">${esc(p.name)}</h1>
+          <div class="bio" ${owner ? 'contenteditable="true" spellcheck="false"' : ''} data-field="bio">${esc(p.bio)}</div>
+        </div>
+        <div class="profile-actions">${actions}</div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <aside class="side">
+        <div class="card">
+          <div class="card-head"><h3>🎵 Музыка</h3><span class="badge">${music.length}</span></div>
+          ${music.length ? `<div class="tracks">${music.map(t => `
+            <div class="track" data-act="play" data-id="${t.id}" data-src="${t.src}">
+              <span class="play">▶</span>
+              <div><b>${esc(t.title)}</b><small>${esc(t.author || '')}</small></div>
+            </div>`).join('')}</div>`
+            : `<p class="muted">Пока нет треков. ${owner ? 'Добавь первый 🎧' : 'Тишина...'}</p>`}
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>👥 Друзья</h3><span class="badge">${friends.length}</span></div>
+          <div class="friend-list">
+            ${friends.map(f => `
+              <div class="friend" data-act="switch" data-id="${f.id}">
+                <div class="mini-avatar">${f.avatar ? `<img src="${f.avatar}" alt="">` : esc(f.name.trim()[0] || '?')}</div>
+                <span>${esc(f.name)}</span>
+              </div>`).join('')}
+            ${owner ? `<div class="friend add" data-act="add-friend"><span>＋</span> Добавить друга</div>` : ''}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>🎁 Подарки</h3><span class="badge">${p.gifts.length}</span></div>
+          ${p.gifts.length ? `<div class="gift-grid">${p.gifts.map(g => `
+            <div class="gift" title="${esc(g.name)} — от ${esc(g.from)}">
+              <span class="gift-emoji">${g.emoji}</span>
+              <span class="gift-name">${esc(g.name)}</span>
+            </div>`).join('')}</div>`
+            : `<p class="muted">Подарков пока нет. ${owner ? 'Порадуй себя 🎁' : ''}</p>`}
+        </div>
+      </aside>
+
+      <main>
+        <div class="tabs">
+          ${['all','photo','video','music','poem','book','pdf'].map(k => `
+            <button class="tab ${filter === k ? 'active' : ''}" data-act="filter" data-filter="${k}">
+              ${k === 'all' ? '✨ Всё' : TYPE_LABELS[k]}
+            </button>`).join('')}
+        </div>
+
+        <div class="posts">
+          ${shown.length ? shown.map(x => postHTML(x, owner, p.id)).join('') : `
+            <div class="empty">
+              <div class="big">${filter === 'all' ? '🌌' : '📭'}</div>
+              <p>Пока здесь пусто.</p>
+              ${owner ? `<p class="muted" style="margin-top:6px">Нажми «➕ Добавить», чтобы наполнить этот мир.</p>` : ''}
+            </div>`}
+        </div>
+      </main>
+    </div>
+  `;
+  syncTracks();
+}
+
+function stickerHTML(s){
+  return `<span class="sticker"
+    style="left:${s.x}%;top:${s.y}%;--rot:${s.rot}deg;animation-delay:${s.delay}s"
+    title="стикер от ${esc(s.from)}">${s.emoji}</span>`;
+}
+
+function pdfCoverHTML(post, profileId){
+  const filename = post.filename || 'PDF-документ';
+  return `<div class="post-media pdf-cover" data-act="open-pdf"
+      data-profile-id="${profileId}" data-post-id="${post.id}"
+      title="Открыть PDF">
+    <div class="pdf-cover-icon">📄</div>
+    <div class="pdf-cover-title">${esc(post.title)}</div>
+    <div class="pdf-cover-hint" title="${esc(filename)}">${esc(filename)}</div>
+    <span class="btn primary small">📖 Читать PDF</span>
+  </div>`;
+}
+
+function postHTML(post, owner, profileId){
+  let media = '';
+  if(post.type === 'photo' && post.src){
+    media = `<div class="post-media"><img class="media" src="${post.src}" alt="${esc(post.title)}" loading="lazy"></div>`;
+  } else if(post.type === 'video' && post.src){
+    media = `<div class="post-media"><video class="media" src="${post.src}" controls preload="metadata"></video></div>`;
+  } else if(post.type === 'music' && post.src){
+    media = `<div class="post-media"><audio class="audio" src="${post.src}" controls preload="none"></audio></div>`;
+  } else if(post.type === 'pdf' && post.src){
+    media = pdfCoverHTML(post, profileId);
+  }
+  const text = (post.type === 'poem' || post.type === 'book') && post.text
+    ? `<div class="post-text">${esc(post.text)}</div>` : '';
+
+  const comments = Array.isArray(post.comments) ? post.comments : [];
+  const commentHint = comments.length ? `💬 ${comments.length} · ` : '';
+
+  return `
+    <article class="post">
+      ${media}
+      <div class="post-info">
+        <div class="post-kind">${TYPE_LABELS[post.type] || ''}</div>
+        <h4>${esc(post.title)}</h4>
+        ${text}
+        <div class="post-foot">
+          <span>${commentHint}${dateStr(post.date)}</span>
+          ${owner ? `<button class="icon-btn" data-act="del-post" data-id="${post.id}" title="Удалить">🗑</button>` : ''}
+        </div>
+      </div>
+    </article>`;
+}
+
+function dateStr(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString('ru-RU', {day:'2-digit', month:'short'}) + ' · ' +
+         d.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+}
+
+function renderWhoTabs(){
+  const list = visibleProfiles();
+  $('#whoTabs').innerHTML = list.map(p => `
+    <button class="who-tab ${p.id === state.current && state.view !== 'feed' ? 'active' : ''}" data-act="switch" data-id="${p.id}">
+      ${p.avatar ? `<img src="${p.avatar}" alt="">` : `<span>${esc((p.name || '?').trim()[0] || '?')}</span>`}
+      ${esc(p.name)}
+    </button>`).join('');
+}
+
+/* ==========================================================
+   ПРОСМОТР PDF
+   ========================================================== */
+function openPdfViewer(profileId, postId){
+  const profile = state.profiles[profileId];
+  if(!profile) return;
+  const post = profile.posts.find(x => x.id === postId);
+  if(!post || !post.src){ toast('PDF не найден 😕'); return; }
+
+  const filename = post.filename || (post.title.replace(/[\/\\:*?"<>|]/g, '_') + '.pdf');
+  modal.innerHTML = `
+    <div class="modal-card pdf-modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2 style="margin-bottom:12px">📄 ${esc(post.title)}</h2>
+      <div class="pdf-viewer-wrap">
+        <iframe src="${post.src}" class="pdf-viewer-frame" title="${esc(post.title)}"></iframe>
+      </div>
+      <div class="option-row" style="margin-top:14px;justify-content:flex-end">
+        <a href="${post.src}" download="${esc(filename)}" class="btn">⬇ Скачать PDF</a>
+        <button class="btn primary" data-act="close-modal">Закрыть</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('show');
+}
+
+/* ==========================================================
+   МОДАЛКИ
+   ========================================================== */
+const modal = $('#modal');
+function closeModal(){
+  modal.classList.remove('show');
+  modal.innerHTML = '';
+  tempTheme = null;
+  tempAppSettings = null;
+  applyAppSettings(state.appSettings);
+}
+modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+
+/* ---------- Настройки приложения ---------- */
+function openAppSettings(){
+  tempAppSettings = Object.assign({}, state.appSettings);
+  renderAppSettingsModal();
+  modal.classList.add('show');
+}
+function renderAppSettingsModal(){
+  const s = tempAppSettings;
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>⚙️ Настройки интерфейса</h2>
+      <p class="muted" style="margin-bottom:6px">
+        Настрой внешний вид приложения под себя — сделай его спокойнее, теплее или строже.
+      </p>
+
+      <div class="section-title">Готовые темы</div>
+      <div class="preset-row">
+        ${APP_PRESETS.map(pr => `
+          <button class="preset ${s.theme === pr.id ? 'active' : ''}"
+            data-act="app-preset" data-id="${pr.id}">${pr.name}</button>`).join('')}
+      </div>
+
+      <div class="section-title">Цвет акцента</div>
+      <label class="field">Акцентный цвет (кнопки, ссылки, выделения)
+        <input type="color" id="a-accent" value="${s.accent}">
+      </label>
+
+      <div class="section-title">Фон приложения</div>
+      <label class="field">Основной фон
+        <input type="color" id="a-bg1" value="${s.bg1}">
+      </label>
+      <label class="field">Пятно 1
+        <input type="color" id="a-bg2" value="${s.bg2}">
+      </label>
+      <label class="field">Пятно 2
+        <input type="color" id="a-bg3" value="${s.bg3}">
+      </label>
+
+      <div class="section-title">Шрифт</div>
+      <div class="option-row">
+        ${FONTS.map(f => `
+          <button class="opt ${s.font === f.id ? 'active' : ''}"
+            data-act="app-font" data-id="${f.id}">${f.name}</button>`).join('')}
+      </div>
+
+      <div class="section-title">Скругление углов: <span id="a-radius-val">${s.radius}px</span></div>
+      <input type="range" id="a-radius" min="0" max="32" step="2" value="${s.radius}">
+
+      <div class="section-title">Плотность</div>
+      <div class="option-row">
+        <button class="opt ${s.density === 'normal' ? 'active' : ''}" data-act="app-density" data-id="normal">Обычная</button>
+        <button class="opt ${s.density === 'compact' ? 'active' : ''}" data-act="app-density" data-id="compact">Компактная</button>
+      </div>
+
+      <div class="section-title">Анимации</div>
+      <div class="option-row">
+        <button class="opt ${!s.calm ? 'active' : ''}" data-act="app-calm" data-id="0">🔊 Включены</button>
+        <button class="opt ${s.calm ? 'active' : ''}" data-act="app-calm" data-id="1">🔇 Спокойный режим</button>
+      </div>
+
+      <div class="option-row" style="margin-top:24px;justify-content:flex-end">
+        <button class="btn" data-act="app-reset">↺ Сбросить</button>
+        <button class="btn primary" data-act="app-save">Сохранить</button>
+      </div>
+    </div>
+  `;
+
+  $('#a-accent')?.addEventListener('input', e => {
+    tempAppSettings.accent = e.target.value;
+    applyAppSettings(tempAppSettings);
+  });
+  $('#a-bg1')?.addEventListener('input', e => {
+    tempAppSettings.bg1 = e.target.value;
+    applyAppSettings(tempAppSettings);
+  });
+  $('#a-bg2')?.addEventListener('input', e => {
+    tempAppSettings.bg2 = e.target.value;
+    applyAppSettings(tempAppSettings);
+  });
+  $('#a-bg3')?.addEventListener('input', e => {
+    tempAppSettings.bg3 = e.target.value;
+    applyAppSettings(tempAppSettings);
+  });
+  $('#a-radius')?.addEventListener('input', e => {
+    tempAppSettings.radius = +e.target.value;
+    $('#a-radius-val').textContent = e.target.value + 'px';
+    applyAppSettings(tempAppSettings);
+  });
+}
+function applyAppPreset(id){
+  const pr = APP_PRESETS.find(p => p.id === id);
+  if(!pr || !tempAppSettings) return;
+  tempAppSettings.theme = pr.id;
+  tempAppSettings.accent = pr.accent;
+  tempAppSettings.bg1 = pr.bg1;
+  tempAppSettings.bg2 = pr.bg2;
+  tempAppSettings.bg3 = pr.bg3;
+  tempAppSettings.calm = pr.calm;
+  applyAppSettings(tempAppSettings);
+  renderAppSettingsModal();
+}
+function saveAppSettings(){
+  state.appSettings = Object.assign({}, tempAppSettings);
+  save();
+  applyAppSettings(state.appSettings);
+  closeModal();
+  toast('Настройки сохранены ⚙️');
+}
+function resetAppSettings(){
+  tempAppSettings = defaultAppSettings();
+  applyAppSettings(tempAppSettings);
+  renderAppSettingsModal();
+  toast('Настройки сброшены к стандартным');
+}
+
+/* ---------- Загрузка контента ---------- */
+function openUpload(){
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>➕ Что добавляем?</h2>
+      <div class="picker-grid type-grid">
+        ${Object.entries(TYPE_LABELS).map(([k, v]) => `
+          <button class="pick wide" data-act="pick-type" data-type="${k}">${v}</button>`).join('')}
+      </div>
+    </div>`;
+  modal.classList.add('show');
+}
+
+function uploadForm(type){
+  const isText = type === 'poem' || type === 'book';
+  const isPdf  = type === 'pdf';
+  const titlePh =
+    type === 'poem' ? 'Название стиха' :
+    (type === 'book' || isPdf) ? 'Название книги' :
+    'Название';
+
+  const dropInner = isPdf
+    ? `<div class="file-drop pdf" id="drop">
+         <span class="pdf-ico">📄</span>
+         <span id="drop-label">Нажми, чтобы выбрать PDF-файл</span>
+         <span class="muted" style="font-size:12px">Только файлы формата .pdf</span>
+       </div>`
+    : `<div class="file-drop" id="drop">
+         <span id="drop-label">📁 Нажми, чтобы выбрать файл</span>
+       </div>`;
+
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>${TYPE_LABELS[type]}</h2>
+      <label class="field">Название
+        <input id="f-title" maxlength="80" placeholder="${titlePh}">
+      </label>
+      ${isText
+        ? `<label class="field">Текст
+             <textarea id="f-text" rows="10" placeholder="Пиши здесь..."></textarea>
+           </label>`
+        : `<div class="field">${dropInner}</div>
+           <input type="file" id="f-file" accept="${TYPE_ACCEPT[type]}" hidden>`}
+      <button class="btn primary" style="width:100%" data-act="submit-upload" data-type="${type}">
+        Опубликовать ✨
+      </button>
+    </div>`;
+  modal.classList.add('show');
+
+  const file = $('#f-file');
+  if(file){
+    $('#drop').addEventListener('click', () => file.click());
+    file.addEventListener('change', () => {
+      const f = file.files[0];
+      if(f) $('#drop-label').textContent = '✅ ' + f.name;
+    });
+  }
+}
+
+async function submitUpload(type){
+  const p = state.profiles[state.current];
+  const title = ($('#f-title').value || '').trim() || 'Без названия';
+  const post = { id: uid(), type, title, date: Date.now(), author: p.name, comments: [] };
+
+  if(type === 'poem' || type === 'book'){
+    const text = ($('#f-text').value || '').trim();
+    if(!text){ toast('Напиши текст ✍️'); return; }
+    post.text = text;
+  } else {
+    const f = $('#f-file').files[0];
+    if(!f){ toast(type === 'pdf' ? 'Выбери PDF-файл 📄' : 'Выбери файл 📁'); return; }
+    if(type === 'pdf' && f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)){
+      toast('Нужен именно PDF-файл 📄'); return;
+    }
+    post.src = await readFile(f);
+    post.filename = f.name;
+  }
+
+  p.posts.unshift(post);
+  save(); closeModal();
+  filter = 'all'; render();
+  toast('Опубликовано ✨');
+}
+
+/* ---------- Стикеры ---------- */
+function openStickers(){
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>😺 Выбери стикер</h2>
+      <p class="muted" style="margin-bottom:16px">Кликни — и он прилипнет к странице «${esc(state.profiles[state.current].name)}»</p>
+      <div class="picker-grid">
+        ${STICKERS.map(s => `<button class="pick" data-act="send-sticker" data-emoji="${s}">${s}</button>`).join('')}
+      </div>
+    </div>`;
+  modal.classList.add('show');
+}
+function sendSticker(emoji){
+  const u = currentUser();
+  if(!u) return;
+  const p = state.profiles[state.current];
+  p.stickers.push({
+    id: uid(), emoji,
+    x: 4 + Math.random() * 84,
+    y: 6 + Math.random() * 62,
+    rot: Math.round(Math.random() * 50 - 25),
+    delay: +(Math.random() * 2.2).toFixed(2),
+    from: u.name
+  });
+  save(); closeModal(); render();
+  toast('Стикер прилип! ' + emoji);
+}
+
+/* ---------- Подарки ---------- */
+function openGifts(){
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>🎁 Выбери подарок</h2>
+      <p class="muted" style="margin-bottom:16px">
+        ${GIFTS.length} вариантов. Подарок появится в профиле «${esc(state.profiles[state.current].name)}»
+      </p>
+      <div class="picker-grid">
+        ${GIFTS.map((g, i) => `
+          <button class="pick" data-act="send-gift" data-index="${i}" title="${esc(g.name)}">${g.emoji}</button>`).join('')}
+      </div>
+    </div>`;
+  modal.classList.add('show');
+}
+function sendGift(index){
+  const u = currentUser();
+  if(!u) return;
+  const g = GIFTS[index];
+  const p = state.profiles[state.current];
+  p.gifts.unshift({ id: uid(), emoji: g.emoji, name: g.name, from: u.name, date: Date.now() });
+  save(); closeModal(); render();
+  const isSelf = p.id === u.id;
+  showGiftReveal(g.emoji, g.name, u.name, p.name, isSelf);
+}
+
+/* ---------- Оформление профиля ---------- */
+function openTheme(){
+  const p = state.profiles[state.current];
+  tempTheme = JSON.parse(JSON.stringify(p.theme));
+  renderThemeModal();
+  modal.classList.add('show');
+}
+function renderThemeModal(){
+  const t = tempTheme;
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>🎨 Оформление профиля</h2>
+
+      <div class="section-title">Готовые темы</div>
+      <div class="preset-row">
+        ${PRESETS.map((pr, i) => `
+          <button class="preset ${pr.accent === t.accent && pr.bg1 === t.bg1 ? 'active' : ''}"
+            data-act="preset-pick" data-index="${i}">${pr.name}</button>`).join('')}
+      </div>
+
+      <div class="section-title">Цвета</div>
+      <label class="field">Акцентный цвет<input type="color" id="t-accent" value="${t.accent}"></label>
+      <label class="field">Фон — цвет 1<input type="color" id="t-bg1" value="${t.bg1}"></label>
+      <label class="field">Фон — цвет 2<input type="color" id="t-bg2" value="${t.bg2}"></label>
+      <label class="field">Угол градиента: <span id="t-angle-val">${t.angle || 140}°</span>
+        <input type="range" id="t-angle" min="0" max="360" value="${t.angle || 140}">
+      </label>
+
+      <div class="section-title">Шрифт</div>
+      <div class="option-row">
+        ${FONTS.map(f => `
+          <button class="opt ${t.font === f.id ? 'active' : ''}"
+            data-act="font-pick" data-value="${f.id}">${f.name}</button>`).join('')}
+      </div>
+
+      <div class="section-title">Форма аватара</div>
+      <div class="option-row">
+        <button class="opt ${t.avatarShape === 'circle'  ? 'active' : ''}" data-act="shape-pick" data-value="circle">◯ Круг</button>
+        <button class="opt ${t.avatarShape === 'rounded' ? 'active' : ''}" data-act="shape-pick" data-value="rounded">◻ Скруглённый</button>
+        <button class="opt ${t.avatarShape === 'square'  ? 'active' : ''}" data-act="shape-pick" data-value="square">■ Квадрат</button>
+      </div>
+
+      <div class="section-title">Узор на обложке</div>
+      <div class="option-row">
+        <button class="opt ${t.pattern === 'none' ? 'active' : ''}" data-act="pattern-pick" data-value="none">Нет</button>
+        <button class="opt ${t.pattern === 'dots' ? 'active' : ''}" data-act="pattern-pick" data-value="dots">Точки</button>
+        <button class="opt ${t.pattern === 'grid' ? 'active' : ''}" data-act="pattern-pick" data-value="grid">Сетка</button>
+      </div>
+
+      <button class="btn primary" style="width:100%;margin-top:22px" data-act="apply-theme">Сохранить</button>
+    </div>
+  `;
+
+  ['accent','bg1','bg2'].forEach(k => {
+    const inp = $('#t-' + k);
+    if(inp) inp.addEventListener('input', () => { tempTheme[k] = inp.value; });
+  });
+  const angle = $('#t-angle');
+  if(angle) angle.addEventListener('input', () => {
+    tempTheme.angle = +angle.value;
+    $('#t-angle-val').textContent = angle.value + '°';
+  });
+}
+
+/* ---------- Добавление друга ---------- */
+function openAddFriend(){
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>👥 Новый друг</h2>
+      <label class="field">Имя<input id="f-name" maxlength="24" placeholder="Как зовут друга?"></label>
+      <label class="field">О себе<textarea id="f-bio" rows="2" placeholder="Пара слов..."></textarea></label>
+      <button class="btn primary" style="width:100%" data-act="create-friend">Добавить друга</button>
+    </div>`;
+  modal.classList.add('show');
+  setTimeout(() => $('#f-name')?.focus(), 60);
+}
+function createFriend(){
+  if(!isOwnerCurrent()){ toast('Только хозяин страницы может добавлять друзей'); return; }
+  const name = ($('#f-name').value || '').trim();
+  if(!name){ toast('Введи имя друга 🙂'); return; }
+  const bio = ($('#f-bio').value || '').trim() || 'Новый друг ✨';
+  const me = currentUser();
+  const id = 'f' + uid();
+  const pr = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+
+  state.profiles[id] = {
+    id, login:null, passHash:null, name, bio,
+    avatar:null, cover:null,
+    theme:{ accent:pr.accent, bg1:pr.bg1, bg2:pr.bg2, angle:pr.angle || 140,
+            font:'ui', avatarShape:'circle', pattern:'none' },
+    friends:[me.id], stickers:[], gifts:[], posts:[]
+  };
+  if(!me.friends.includes(id)) me.friends.push(id);
+  save(); closeModal(); render();
+  toast('Друг «' + name + '» добавлен! 🤝');
+}
+
+/* ---------- Создание аккаунта для друга ---------- */
+function openCreateFriendAccount(friendId){
+  const f = state.profiles[friendId];
+  if(!f) return;
+  modal.innerHTML = `
+    <div class="modal-card">
+      <button class="close" data-act="close-modal">✕</button>
+      <h2>🔑 Аккаунт для «${esc(f.name)}»</h2>
+      <p class="muted" style="margin-bottom:16px">
+        Придумай логин и пароль — передай их другу, чтобы он мог войти и вести свою страницу.
+      </p>
+      <label class="field">Логин
+        <input id="f-login" maxlength="32" placeholder="Например, danya" value="${esc(suggestLogin(f.name))}">
+      </label>
+      <label class="field">Пароль
+        <input id="f-pass" type="password" maxlength="64" placeholder="Минимум 4 символа">
+      </label>
+      <label class="field">Повтори пароль
+        <input id="f-pass2" type="password" maxlength="64" placeholder="Ещё раз">
+      </label>
+      <button class="btn primary" style="width:100%" data-act="submit-friend-account" data-id="${friendId}">
+        Создать аккаунт
+      </button>
+    </div>`;
+  modal.classList.add('show');
+  setTimeout(() => $('#f-login')?.focus(), 60);
+}
+function submitFriendAccount(friendId){
+  const f = state.profiles[friendId];
+  if(!f || f.passHash) return;
+  const login = ($('#f-login').value || '').trim().toLowerCase();
+  const pass  = $('#f-pass').value || '';
+  const pass2 = $('#f-pass2').value || '';
+
+  if(!/^[a-z0-9_]{3,32}$/.test(login)){
+    toast('Логин: 3–32 символа, латиница, цифры и _'); return;
+  }
+  if(pass.length < 4){ toast('Пароль минимум 4 символа'); return; }
+  if(pass !== pass2){ toast('Пароли не совпадают'); return; }
+  if(loginTaken(login, friendId)){ toast('Этот логин уже занят'); return; }
+
+  f.login = login;
+  f.passHash = hash(pass);
+  save(); closeModal(); render();
+  toast('Аккаунт создан! Логин: ' + login);
+}
+
+/* ==========================================================
+   СОБЫТИЯ
+   ========================================================== */
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('[data-auth-tab]');
+  if(tabBtn){ renderAuthTab(tabBtn.dataset.authTab); return; }
+
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const act = el.dataset.act;
+
+  switch(act){
+    case 'do-login':    doLogin(); break;
+    case 'do-observer': doObserver(); break;
+    case 'logout':      doLogout(); break;
+
+    case 'open-app-settings': openAppSettings(); break;
+    case 'app-preset': applyAppPreset(el.dataset.id); break;
+    case 'app-font':
+      if(!tempAppSettings) break;
+      tempAppSettings.font = el.dataset.id;
+      applyAppSettings(tempAppSettings);
+      renderAppSettingsModal();
+      break;
+    case 'app-density':
+      if(!tempAppSettings) break;
+      tempAppSettings.density = el.dataset.id;
+      applyAppSettings(tempAppSettings);
+      renderAppSettingsModal();
+      break;
+    case 'app-calm':
+      if(!tempAppSettings) break;
+      tempAppSettings.calm = el.dataset.id === '1';
+      applyAppSettings(tempAppSettings);
+      renderAppSettingsModal();
+      break;
+    case 'app-save':  saveAppSettings(); break;
+    case 'app-reset': resetAppSettings(); break;
+
+    case 'go-profile':
+      state.view = 'profile';
+      if(!state.profiles[state.current]) state.current = 'westic';
+      save(); render();
+      window.scrollTo({top:0, behavior:'smooth'});
+      break;
+
+    case 'go-feed':
+      state.view = 'feed';
+      save(); render();
+      window.scrollTo({top:0, behavior:'smooth'});
+      break;
+
+    case 'switch':
+      state.current = el.dataset.id;
+      state.view = 'profile';
+      filter = 'all';
+      save(); render();
+      window.scrollTo({top:0, behavior:'smooth'});
+      break;
+
+    case 'filter':
+      filter = el.dataset.filter;
+      render();
+      break;
+
+    case 'upload':
+      if(!isOwnerCurrent()){ toast('Только хозяин страницы может добавлять'); break; }
+      openUpload(); break;
+
+    case 'pick-type':
+      if(!isOwnerCurrent()) break;
+      uploadForm(el.dataset.type); break;
+
+    case 'submit-upload':
+      if(!isOwnerCurrent()) break;
+      submitUpload(el.dataset.type); break;
+
+    case 'close-modal': closeModal(); break;
+
+    case 'stickers':
+      if(!currentUser()){ toast('Войдите, чтобы отправлять стикеры'); break; }
+      openStickers(); break;
+
+    case 'send-sticker':
+      if(!currentUser()){ toast('Войдите, чтобы отправлять стикеры'); break; }
+      sendSticker(el.dataset.emoji); break;
+
+    case 'gifts':
+      if(!currentUser()){ toast('Войдите, чтобы дарить подарки'); break; }
+      openGifts(); break;
+
+    case 'send-gift':
+      if(!currentUser()){ toast('Войдите, чтобы дарить подарки'); break; }
+      sendGift(+el.dataset.index); break;
+
+    /* --- открытие PDF --- */
+    case 'open-pdf': {
+      const pid = el.dataset.profileId;
+      const postId = el.dataset.postId;
+      if(pid && postId) openPdfViewer(pid, postId);
+      break;
+    }
+
+    case 'theme':
+      if(!isOwnerCurrent()) break;
+      openTheme(); break;
+
+    case 'preset-pick': {
+      if(!isOwnerCurrent() || !tempTheme) break;
+      const pr = PRESETS[+el.dataset.index];
+      tempTheme.accent = pr.accent;
+      tempTheme.bg1    = pr.bg1;
+      tempTheme.bg2    = pr.bg2;
+      tempTheme.angle  = pr.angle || 140;
+      renderThemeModal();
+      break;
+    }
+    case 'font-pick':
+      if(!isOwnerCurrent() || !tempTheme) break;
+      tempTheme.font = el.dataset.value;
+      renderThemeModal();
+      break;
+    case 'shape-pick':
+      if(!isOwnerCurrent() || !tempTheme) break;
+      tempTheme.avatarShape = el.dataset.value;
+      renderThemeModal();
+      break;
+    case 'pattern-pick':
+      if(!isOwnerCurrent() || !tempTheme) break;
+      tempTheme.pattern = el.dataset.value;
+      renderThemeModal();
+      break;
+
+    case 'apply-theme': {
+      if(!isOwnerCurrent() || !tempTheme) break;
+      const p = state.profiles[state.current];
+      p.theme = {
+        accent:      tempTheme.accent,
+        bg1:         tempTheme.bg1,
+        bg2:         tempTheme.bg2,
+        angle:       tempTheme.angle || 140,
+        font:        tempTheme.font || 'ui',
+        avatarShape: tempTheme.avatarShape || 'circle',
+        pattern:     tempTheme.pattern || 'none'
+      };
+      save(); closeModal(); render();
+      toast('Оформление обновлено 🎨');
+      break;
+    }
+
+    case 'pick-cover':
+      if(!isOwnerCurrent()){ toast('Только хозяин страницы может менять фон'); break; }
+      pickFile('image/*', url => {
+        state.profiles[state.current].cover = url;
+        save(); render(); toast('Фон обновлён 🖼');
+      });
+      break;
+
+    case 'pick-avatar':
+      if(!isOwnerCurrent()){ toast('Только хозяин страницы может менять аватар'); break; }
+      pickFile('image/*', url => {
+        state.profiles[state.current].avatar = url;
+        save(); render(); toast('Аватар обновлён 😎');
+      });
+      break;
+
+    case 'add-friend':
+      if(!isOwnerCurrent()){ toast('Только хозяин страницы может добавлять друзей'); break; }
+      openAddFriend(); break;
+
+    case 'create-friend':
+      if(!isOwnerCurrent()) break;
+      createFriend(); break;
+
+    case 'create-friend-account': {
+      const u = currentUser();
+      const f = state.profiles[state.current];
+      if(!u || !f || f.id === u.id || !u.friends.includes(f.id) || f.passHash){
+        toast('Недоступно'); break;
+      }
+      openCreateFriendAccount(f.id);
+      break;
+    }
+    case 'submit-friend-account': {
+      const u = currentUser();
+      const f = state.profiles[el.dataset.id];
+      if(!u || !f || !u.friends.includes(f.id) || f.passHash){
+        toast('Недоступно'); break;
+      }
+      submitFriendAccount(f.id);
+      break;
+    }
+
+    case 'delete-account': {
+      const u = currentUser();
+      const target = state.profiles[el.dataset.id];
+      if(!u || !target) break;
+      const isSelf = u.id === target.id;
+      if(!isSelf && !u.friends.includes(target.id)){ toast('Недоступно'); break; }
+      openDeleteAccount(target.id);
+      break;
+    }
+    case 'confirm-delete-account':
+      confirmDeleteAccount(el.dataset.id);
+      break;
+
+    case 'play':
+      playTrack(el.dataset.id, el.dataset.src);
+      break;
+
+    case 'del-post': {
+      if(!isOwnerCurrent()) break;
+      const pp = state.profiles[state.current];
+      pp.posts = pp.posts.filter(x => x.id !== el.dataset.id);
+      save(); render(); toast('Удалено 🗑');
+      break;
+    }
+  }
+});
+
+/* Комментарии в ленте */
+document.addEventListener('submit', e => {
+  const form = e.target.closest('.comment-form');
+  if(!form) return;
+  e.preventDefault();
+  if(!state.session){ toast('Войдите, чтобы комментировать'); return; }
+
+  const input = form.querySelector('input');
+  const text = (input.value || '').trim();
+  if(!text) return;
+
+  const postId = form.dataset.postId;
+  const profileId = form.dataset.profileId;
+  const profile = state.profiles[profileId];
+  if(!profile) return;
+  const post = profile.posts.find(x => x.id === postId);
+  if(!post) return;
+  if(!Array.isArray(post.comments)) post.comments = [];
+
+  const author = state.session.observer
+    ? 'Наблюдатель'
+    : (currentUser()?.name || 'Гость');
+
+  post.comments.push({ id: uid(), author, text, date: Date.now() });
+  save(); render();
+  toast('Комментарий добавлен 💬');
+});
+
+/* Сохранение имени/био при потере фокуса */
+document.addEventListener('focusout', e => {
+  const f = e.target.closest?.('[data-field]');
+  if(!f) return;
+  if(!isOwnerCurrent()) return;
+  const p = state.profiles[state.current];
+  const field = f.dataset.field;
+  let val = (f.innerText || '').trim();
+  if(field === 'name' && !val) val = p.name;
+  p[field] = val;
+  save();
+});
+
+/* Enter / Escape */
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closeModal(); return; }
+  const auth = $('#auth');
+  if(auth && auth.classList.contains('show')){
+    if(e.key === 'Enter'){
+      const active = document.querySelector('.auth-tab.active');
+      const tab = active?.dataset.authTab;
+      if(tab === 'login') doLogin();
+      else doObserver();
+    }
+    return;
+  }
+  if(e.key === 'Enter' && e.target.id === 'f-name'){
+    e.preventDefault();
+    createFriend();
+  }
+});
+
+/* ==========================================================
+   СТАРТ
+   ========================================================== */
+applyAppSettings(state.appSettings);
+render();
+
+if(!state.session){
+  showAuth('login');
+} else {
+  hideAuth();
+}
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    $('#loader').classList.add('hide');
+    setTimeout(() => $('#loader').remove(), 800);
+  }, 1100);
+});
+</script>
+</body>
+</html>
