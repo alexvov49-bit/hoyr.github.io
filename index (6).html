@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой уголок — фото, стихи, книги</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --paper:#f4efe6; --card:#ffffff; --ink:#2b2420; --ink-soft:#4a4038;
+    --muted:#8a7f75; --line:#e6dccd; --accent:#b8622e;
+    --input-bg:#fbf8f3; --hover-bg:#faf5ec;
+    --topbar-bg:rgba(250,246,239,.92); --tabs-bg:#eee6d9;
+    --badge-bg:#f3ece0; --badge-fg:#9a6a3f;
+    --toast-bg:#2b2420; --toast-fg:#ffffff;
+    --overlay-bg:rgba(40,32,26,.45);
+    --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --font-serif:Georgia,'Times New Roman',serif;
+    --radius:16px;
+  }
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--font-body);
+    background:var(--paper);color:var(--ink);
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    transition:background-color .4s ease, color .4s ease;
+  }
+  h1,h2,h3,.serif{font-family:var(--font-serif);font-weight:600;letter-spacing:.2px}
+
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:12px 20px;
+    background:var(--topbar-bg);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    transition:background-color .4s ease, border-color .4s ease;
+  }
+  .brand{font-family:var(--font-serif);font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px;white-space:nowrap;color:var(--ink)}
+  .tabs{display:flex;gap:4px;background:var(--tabs-bg);padding:4px;border-radius:12px}
+  .tab{
+    border:none;background:transparent;padding:8px 16px;border-radius:9px;cursor:pointer;
+    font-size:14px;font-weight:600;color:var(--muted);transition:.18s;font-family:inherit;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .spacer{flex:1}
+  .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{
+    border:none;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:.18s;font-family:inherit;
+  }
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .btn-primary:hover{filter:brightness(1.07);transform:translateY(-1px)}
+  .btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--hover-bg)}
+  .btn-danger{background:#c9463c;color:#fff}
+  .btn-icon{
+    padding:0;width:38px;height:38px;border-radius:10px;
+    background:var(--card);border:1px solid var(--line);cursor:pointer;
+    font-size:16px;display:flex;align-items:center;justify-content:center;
+    transition:.15s;font-family:inherit;color:var(--ink);
+  }
+  .btn-icon:hover{background:var(--hover-bg)}
+
+  .user-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:5px 12px 5px 5px;border-radius:999px;
+    background:var(--hover-bg);font-size:13px;font-weight:600;
+    max-width:170px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+    color:var(--ink);
+  }
+  .user-chip .avatar{width:26px;height:26px;font-size:12px;border-width:1px;flex-shrink:0}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 20px 80px}
+
+  .feed-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .feed-head h1{margin:0;font-size:26px;margin-right:auto;color:var(--ink)}
+  .search-input{
+    padding:9px 14px;border:1px solid var(--line);border-radius:11px;
+    font-size:14px;font-family:inherit;background:var(--card);color:var(--ink);
+    outline:none;flex:0 1 240px;min-width:160px;transition:.15s;
+  }
+  .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(184,98,46,.12)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 15px;
+    font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:.18s;font-family:inherit;
+  }
+  .chip:hover{color:var(--ink)}
+  .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:20px}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 2px 12px rgba(0,0,0,.05);
+    transition:box-shadow .2s, transform .2s, background-color .4s;
+    animation:fade .35s ease;
+  }
+  .card:hover{box-shadow:0 8px 26px rgba(0,0,0,.11);transform:translateY(-2px)}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .card-head{display:flex;align-items:center;gap:10px;padding:14px 16px 0}
+  .avatar{
+    width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--tabs-bg);
+    display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted);
+    font-size:15px;flex-shrink:0;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line);
+  }
+  .card-author{font-size:14px;font-weight:700;cursor:pointer;color:var(--ink)}
+  .card-author:hover{color:var(--accent)}
+  .card-date{font-size:12px;color:var(--muted)}
+
+  .card-body{padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .badge{
+    align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.4px;
+    text-transform:uppercase;padding:4px 10px;border-radius:999px;
+    background:var(--badge-bg);color:var(--badge-fg);
+  }
+  .card-title{font-size:17px;margin:0;line-height:1.35;color:var(--ink)}
+  .card-text{
+    font-size:14.5px;line-height:1.65;color:var(--ink-soft);white-space:pre-wrap;margin:0;
+    font-family:var(--font-serif);
+  }
+  .card-text.clamped{
+    display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .card-img{width:100%;display:block;border-radius:12px;max-height:340px;object-fit:cover;background:var(--tabs-bg)}
+  .more-btn{
+    align-self:flex-start;background:none;border:none;color:var(--accent);font-weight:700;
+    font-size:13px;cursor:pointer;padding:0;font-family:inherit;
+  }
+  .more-btn:hover{text-decoration:underline}
+
+  .pdf-attachment{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;background:var(--input-bg);
+    border:1px solid var(--line);border-radius:12px;
+  }
+  .pdf-icon{font-size:22px;flex-shrink:0}
+  .pdf-info{flex:1;min-width:0}
+  .pdf-name{
+    font-size:13px;font-weight:600;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .pdf-size{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .pdf-attachment .btn{padding:6px 10px;font-size:12.5px}
+
+  /* === Медиа: видео и аудио === */
+  .card-media{
+    width:100%;display:block;border-radius:12px;max-height:400px;
+    background:#000;object-fit:contain;
+  }
+  .audio-attachment{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:10px;background:var(--input-bg);
+    border:1px solid var(--line);border-radius:12px;
+  }
+  .audio-cover{
+    width:80px;height:80px;border-radius:10px;object-fit:cover;flex-shrink:0;
+  }
+  .audio-cover-placeholder{
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;background:var(--badge-bg);
+  }
+  .audio-info{flex:1;min-width:0}
+  .audio-info audio{width:100%;display:block;margin-top:4px}
+  .audio-name{
+    font-size:13.5px;font-weight:600;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .audio-meta{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+  .card-foot{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:0 16px 14px;gap:8px;
+  }
+  .foot-left{display:flex;gap:6px;align-items:center}
+  .like-btn{
+    background:none;border:none;padding:5px 10px;border-radius:9px;
+    cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);font-family:inherit;
+    display:inline-flex;align-items:center;gap:5px;transition:.15s;
+  }
+  .like-btn:hover{background:var(--hover-bg)}
+  .like-btn.liked{color:#c9463c}
+  .del-btn{
+    background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;
+    font-family:inherit;padding:4px 8px;border-radius:6px;
+  }
+  .del-btn:hover{color:#c9463c;background:#fbeeec}
+
+  .empty{
+    text-align:center;padding:70px 20px;color:var(--muted);
+    background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);
+  }
+  .empty h3{margin:0 0 8px;color:var(--ink)}
+
+  .profile{
+    border-radius:22px;overflow:hidden;background:var(--card);border:1px solid var(--line);
+    box-shadow:0 4px 24px rgba(0,0,0,.07);
+  }
+  .profile-cover{height:190px;background:var(--accent);background-size:cover;background-position:center;position:relative}
+  .profile-cover::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22))}
+  .cover-sticker{
+    position:absolute;left:var(--x);top:var(--y);z-index:2;
+    transform:translate(-50%,-50%) rotate(var(--r,0deg));
+    font-size:32px;line-height:1;pointer-events:none;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.3));
+  }
+  .profile-main{display:flex;gap:20px;padding:0 28px 24px;margin-top:-52px;position:relative;flex-wrap:wrap;align-items:flex-end}
+  .profile-avatar{
+    width:110px;height:110px;border-radius:50%;object-fit:cover;background:var(--tabs-bg);
+    border:5px solid var(--card);box-shadow:0 4px 16px rgba(0,0,0,.12);
+    display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted);
+    flex-shrink:0;
+  }
+  .profile-info{flex:1;min-width:220px;padding-bottom:4px}
+  .profile-name{margin:0;font-size:28px;}
+  .profile-bio{margin:6px 0 0;color:var(--ink-soft);font-size:15px;line-height:1.6;white-space:pre-wrap;font-family:var(--font-serif)}
+  .profile-stats{display:flex;gap:22px;padding:0 28px 26px;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat b{display:block;font-size:21px;font-family:var(--font-serif);color:var(--ink)}
+  .stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+
+  .section-title{font-size:19px;margin:34px 0 16px;display:flex;align-items:center;gap:12px;color:var(--ink)}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  .overlay{
+    position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(3px);
+    display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;
+    z-index:200;overflow-y:auto;animation:fade .2s ease;
+  }
+  .modal{
+    background:var(--card);border-radius:20px;padding:26px;width:100%;max-width:560px;
+    box-shadow:0 24px 60px rgba(0,0,0,.28);animation:pop .25s ease;color:var(--ink);
+  }
+  @keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+  .modal h2{margin:0 0 18px;font-size:22px;color:var(--ink)}
+  .field{display:block;margin-bottom:16px}
+  .field > span{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
+  input[type=text], input[type=password], input[type=file], textarea, select.full{
+    width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;
+    font-size:14.5px;font-family:inherit;background:var(--input-bg);color:var(--ink);outline:none;
+    transition:.15s;
+  }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus, select.full:focus{
+    border-color:var(--accent);background:var(--card);box-shadow:0 0 0 3px rgba(184,98,46,.12);
+  }
+  textarea{resize:vertical;min-height:120px;line-height:1.6}
+  input[type=file]{padding:8px;cursor:pointer;font-size:13px}
+  input[type=color]{
+    width:100%;height:44px;padding:4px;border:1px solid var(--line);border-radius:11px;
+    background:var(--input-bg);cursor:pointer;
+  }
+  .type-picker{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .type-btn{
+    flex:1;min-width:86px;padding:12px 6px;border-radius:12px;border:1.5px solid var(--line);
+    background:var(--input-bg);cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);
+    font-family:inherit;transition:.15s;
+  }
+  .type-btn:hover{border-color:var(--muted)}
+  .type-btn.active{border-color:var(--accent);background:var(--badge-bg);color:var(--accent)}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}
+  .preview-img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:16px;display:block}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .sticker-picker{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .sticker-toggle{
+    width:42px;height:42px;border-radius:50%;border:2px solid var(--line);
+    background:var(--input-bg);font-size:21px;cursor:pointer;transition:.15s;
+    display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit;
+  }
+  .sticker-toggle:hover{border-color:var(--accent);transform:scale(1.08)}
+  .sticker-toggle.active{border-color:var(--accent);background:var(--badge-bg);transform:scale(1.1)}
+  .sticker-counter{font-size:12.5px;color:var(--muted);margin:0 0 18px}
+
+  .gradient-picker{display:flex;flex-wrap:wrap;gap:8px}
+  .gradient-swatch{
+    width:44px;height:44px;border-radius:10px;border:2px solid var(--line);
+    cursor:pointer;transition:.15s;padding:0;flex-shrink:0;
+  }
+  .gradient-swatch:hover{border-color:var(--accent);transform:scale(1.06)}
+  .gradient-swatch.active{border-color:var(--accent);border-width:3px}
+
+  #gateScreen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:20px;background:var(--paper);
+  }
+  .gate-card{
+    background:var(--card);border-radius:22px;padding:34px 30px;
+    width:100%;max-width:420px;
+    box-shadow:0 20px 60px rgba(0,0,0,.13);
+    border:1px solid var(--line);
+    animation:pop .3s ease;color:var(--ink);
+  }
+  .gate-card h1{margin:0 0 8px;font-size:25px;text-align:center}
+  .gate-card p.lead{margin:0 0 22px;color:var(--muted);text-align:center;font-size:14px;line-height:1.55}
+  .gate-card .field{margin-bottom:14px}
+  .gate-btn{width:100%;padding:13px;font-size:15px;margin-top:6px}
+  .gate-divider{
+    display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:12px;
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  .gate-divider::before,.gate-divider::after{content:'';flex:1;height:1px;background:var(--line)}
+  .gate-hint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:18px;line-height:1.55}
+  .gate-err{
+    background:#fbeeec;color:#c9463c;padding:10px 14px;border-radius:10px;
+    font-size:13px;margin-bottom:14px;display:none;line-height:1.45;
+  }
+  .gate-err.show{display:block}
+
+  .note{
+    background:var(--input-bg);border-left:3px solid var(--accent);padding:11px 14px;
+    border-radius:8px;font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 16px;
+  }
+
+  .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;margin-bottom:8px}
+  .theme-card{
+    background:var(--input-bg);border:2px solid var(--line);border-radius:14px;
+    padding:9px;cursor:pointer;transition:.18s;font-family:inherit;text-align:left;
+  }
+  .theme-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .theme-card.active{border-color:var(--accent);background:var(--badge-bg)}
+  .theme-preview{
+    height:66px;border-radius:8px;border:1px solid;position:relative;
+    overflow:hidden;margin-bottom:8px;
+  }
+  .theme-preview-card{position:absolute;left:10px;right:10px;top:10px;bottom:26px;border-radius:6px}
+  .theme-preview-accent{position:absolute;bottom:8px;left:10px;right:55%;height:8px;border-radius:4px}
+  .theme-name{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--toast-bg);color:var(--toast-fg);padding:12px 22px;border-radius:12px;font-size:14px;
+    font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:400;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .vol-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .vol-row input[type=range]{flex:1;accent-color:var(--accent)}
+
+  @media(max-width:640px){
+    .topbar{padding:10px 12px;gap:8px}
+    .brand span{display:none}
+    .tabs{order:3;width:100%;justify-content:center}
+    main{padding:18px 14px 70px}
+    .profile-main{padding:0 18px 18px}
+    .profile-stats{padding:0 18px 20px}
+    .feed-head h1{font-size:22px;margin-right:0;width:100%}
+    .search-input{flex:1 1 100%}
+    .row{grid-template-columns:1fr}
+    .user-chip span{display:none}
+    .audio-cover{width:60px;height:60px}
+  }
+</style>
+</head>
+<body>
+
+<div id="gateScreen"></div>
+
+<div id="appRoot" style="display:none">
+  <header class="topbar">
+    <div class="brand">📖 <span>Мой уголок</span></div>
+    <nav class="tabs">
+      <button class="tab active" data-view="feed">Лента</button>
+      <button class="tab" data-view="profile">Профиль</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="actions">
+      <span class="user-chip" id="currentUserChip"></span>
+      <button class="btn-icon" id="musicBtn" title="Музыка">🔇</button>
+      <button class="btn-icon" id="themeBtn" title="Стиль интерфейса">🎨</button>
+      <button class="btn btn-ghost" id="addFriendBtn" title="Добавить друга">+ Друг</button>
+      <button class="btn btn-ghost" id="settingsBtn" title="Настройки">⚙</button>
+      <button class="btn btn-primary" id="addPostBtn">+ Добавить</button>
+      <button class="btn btn-ghost" id="logoutBtn">Выйти</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="feedView">
+      <div class="feed-head">
+        <h1 class="serif">Лента уголка</h1>
+        <input class="search-input" id="searchInput" placeholder="🔍 Поиск по записям…">
+        <div class="chips" id="chips">
+          <button class="chip active" data-filter="all">Всё</button>
+          <button class="chip" data-filter="photo">📷 Фото</button>
+          <button class="chip" data-filter="poem">✒️ Стихи</button>
+          <button class="chip" data-filter="book">📚 Книги</button>
+          <button class="chip" data-filter="video">🎬 Видео</button>
+          <button class="chip" data-filter="music">🎵 Музыка</button>
+        </div>
+      </div>
+      <div class="grid" id="feedGrid"></div>
+    </section>
+
+    <section id="profileView" style="display:none"></section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+/* =========================================================
+   КОНСТАНТЫ И ТЕМЫ
+   ========================================================= */
+const STORAGE_KEY = 'moy-ugolok-v1';
+const SESSION_KEY = 'moy-ugolok-session';
+const AUTOLOCK_MS = 10 * 60 * 1000;
+const REMEMBER_MS = 30 * 86400000;
+const TYPES = { photo:'Фото', poem:'Стих', book:'Книга', video:'Видео', music:'Музыка' };
+const PDF_MAX = 2 * 1024 * 1024;
+const VIDEO_MAX = 5 * 1024 * 1024;
+const AUDIO_MAX = 3 * 1024 * 1024;
+const STICKER_MAX = 20;
+
+const STICKER_PACK = [
+  '🌟','✨','🌙','⭐','💫','🌸','🌺','🌻','🍀','🌈',
+  '🦋','🎈','💛','💜','🎨','📚','🖋️','🕯️','☕','🌿',
+  '🍁','❄️','🔥','🎵','🦫','🐈','🐦','🍄','🌊','☀️',
+  '💖','💎','🪐','🌷','🪴','🍂','🎭','🎪','🏵️','🌼',
+  '🪶','📖','☔','🌠','🌴','🦊','🦉','🌾','🧸','🍓',
+  '🍒','🥀','🌹','💐','🎀','🪄','👑','🗝️','🎧','📷'
+];
+
+const STICKER_POS = [
+  {x:8,y:22,r:-9},{x:20,y:64,r:6},{x:33,y:26,r:-5},{x:47,y:70,r:9},
+  {x:60,y:30,r:-7},{x:73,y:66,r:5},{x:86,y:26,r:-8},{x:92,y:64,r:7},
+  {x:14,y:82,r:6},{x:80,y:86,r:-5},
+  {x:5,y:50,r:3},{x:28,y:85,r:-8},{x:41,y:44,r:7},{x:55,y:88,r:-3},
+  {x:68,y:48,r:10},{x:80,y:45,r:-6},{x:95,y:40,r:5},{x:20,y:45,r:-10},
+  {x:47,y:15,r:4},{x:63,y:82,r:-9}
+];
+
+const COVER_PRESETS = [
+  { name:'Закат',   bg:'linear-gradient(135deg,#f6d365,#fda085)' },
+  { name:'Море',    bg:'linear-gradient(135deg,#a1c4fd,#c2e9fb)' },
+  { name:'Лес',     bg:'linear-gradient(135deg,#d4fc79,#96e6a1)' },
+  { name:'Сирень',  bg:'linear-gradient(135deg,#e0c3fc,#8ec5fc)' },
+  { name:'Золото',  bg:'linear-gradient(135deg,#fceabb,#f8b500)' },
+  { name:'Ночь',    bg:'linear-gradient(135deg,#2c3e50,#4ca1af)' },
+  { name:'Роза',    bg:'linear-gradient(135deg,#f78ca0,#f9748f,#fd868c)' },
+  { name:'Океан',   bg:'linear-gradient(135deg,#2193b0,#6dd5ed)' }
+];
+
+const BASE_VARS = {
+  '--paper':'#f4efe6','--card':'#ffffff','--ink':'#2b2420','--ink-soft':'#4a4038',
+  '--muted':'#8a7f75','--line':'#e6dccd','--accent':'#b8622e',
+  '--input-bg':'#fbf8f3','--hover-bg':'#faf5ec',
+  '--topbar-bg':'rgba(250,246,239,.92)','--tabs-bg':'#eee6d9',
+  '--badge-bg':'#f3ece0','--badge-fg':'#9a6a3f',
+  '--toast-bg':'#2b2420','--toast-fg':'#ffffff',
+  '--overlay-bg':'rgba(40,32,26,.45)',
+  '--font-body':"-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+  '--font-serif':"Georgia,'Times New Roman',serif"
+};
+
+const UI_THEMES = {
+  paper: { name:'Уютная бумага', icon:'📜', vars:{},
+    music:{ root:261.63, scale:[0,2,4,7,9], tempo:6500, wave:'sine' } },
+  night: { name:'Ночная библиотека', icon:'🌙',
+    vars:{ '--paper':'#161821','--card':'#1e2130','--ink':'#e8e5da','--ink-soft':'#c4bfae',
+      '--muted':'#8b8fa3','--line':'#2e3344','--accent':'#c9a04a',
+      '--input-bg':'#262a3a','--hover-bg':'#282d3e',
+      '--topbar-bg':'rgba(22,24,33,.92)','--tabs-bg':'#262a3a',
+      '--badge-bg':'#2e3344','--badge-fg':'#c9a04a',
+      '--toast-bg':'#e8e5da','--toast-fg':'#161821',
+      '--overlay-bg':'rgba(0,0,0,.62)' },
+    music:{ root:220, scale:[0,3,5,7,10], tempo:8500, wave:'sine' } },
+  forest: { name:'Лесная тропа', icon:'🌿',
+    vars:{ '--paper':'#eef3e9','--card':'#ffffff','--ink':'#2d3a28','--ink-soft':'#4d5a48',
+      '--muted':'#7a8872','--line':'#d2ddc7','--accent':'#5a7d3c',
+      '--input-bg':'#f5f9f0','--hover-bg':'#e8f0dd',
+      '--topbar-bg':'rgba(238,243,233,.92)','--tabs-bg':'#e2ecd7',
+      '--badge-bg':'#e2ecd7','--badge-fg':'#4a6b30' },
+    music:{ root:293.66, scale:[0,2,4,7,9], tempo:7000, wave:'sine' } },
+  sea: { name:'Морской бриз', icon:'🌊',
+    vars:{ '--paper':'#e8f1f5','--card':'#ffffff','--ink':'#1f3540','--ink-soft':'#3d5560',
+      '--muted':'#6d8896','--line':'#c9dde6','--accent':'#2e7d9c',
+      '--input-bg':'#eef6f9','--hover-bg':'#dbeaf1',
+      '--topbar-bg':'rgba(232,241,245,.92)','--tabs-bg':'#dbeaf1',
+      '--badge-bg':'#dbeaf1','--badge-fg':'#2e7d9c' },
+    music:{ root:246.94, scale:[0,2,4,7,9], tempo:7500, wave:'sine' } },
+  sunset: { name:'Тёплый закат', icon:'🌅',
+    vars:{ '--paper':'#fbf0e6','--card':'#ffffff','--ink':'#3d2620','--ink-soft':'#5d3d33',
+      '--muted':'#9a7a6a','--line':'#f0ddcd','--accent':'#d94a3d',
+      '--input-bg':'#fdf6ee','--hover-bg':'#fbe3db',
+      '--topbar-bg':'rgba(251,240,230,.92)','--tabs-bg':'#fbe3db',
+      '--badge-bg':'#fbe3db','--badge-fg':'#b8402e' },
+    music:{ root:329.63, scale:[0,2,4,5,7,9,11], tempo:6000, wave:'triangle' } },
+  mono: { name:'Минимализм', icon:'◻️',
+    vars:{ '--paper':'#f5f5f5','--card':'#ffffff','--ink':'#1a1a1a','--ink-soft':'#3a3a3a',
+      '--muted':'#888888','--line':'#e0e0e0','--accent':'#333333',
+      '--input-bg':'#f5f5f5','--hover-bg':'#eaeaea',
+      '--topbar-bg':'rgba(245,245,245,.92)','--tabs-bg':'#eaeaea',
+      '--badge-bg':'#eaeaea','--badge-fg':'#555555',
+      '--font-serif':"-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" },
+    music:{ root:261.63, scale:[0,7], tempo:10000, wave:'sine' } },
+  spring: { name:'Весенний сад', icon:'🌸',
+    vars:{ '--paper':'#fdf4f7','--card':'#ffffff','--ink':'#3d2b34','--ink-soft':'#5d4450',
+      '--muted':'#a08090','--line':'#f0dfe6','--accent':'#c76a8e',
+      '--input-bg':'#fef8fa','--hover-bg':'#fce8ef',
+      '--topbar-bg':'rgba(253,244,247,.92)','--tabs-bg':'#fbe4ec',
+      '--badge-bg':'#fbe4ec','--badge-fg':'#a8527a' },
+    music:{ root:349.23, scale:[0,2,4,7,9], tempo:7000, wave:'sine' } },
+  autumn: { name:'Золотая осень', icon:'🍁',
+    vars:{ '--paper':'#f5ece0','--card':'#fffaf3','--ink':'#3e2a1e','--ink-soft':'#5d4130',
+      '--muted':'#967a63','--line':'#e6d4bf','--accent':'#a86530',
+      '--input-bg':'#fbf3e6','--hover-bg':'#f5e6d2',
+      '--topbar-bg':'rgba(245,236,224,.92)','--tabs-bg':'#ecdcc6',
+      '--badge-bg':'#ecdcc6','--badge-fg':'#8a5226' },
+    music:{ root:293.66, scale:[0,3,5,7,10], tempo:7500, wave:'triangle' } },
+  cosmos: { name:'Космос', icon:'🌌',
+    vars:{ '--paper':'#0f1120','--card':'#1a1d2e','--ink':'#e8e5da','--ink-soft':'#c4bfae',
+      '--muted':'#8886a3','--line':'#2a2d42','--accent':'#8b7fd4',
+      '--input-bg':'#232638','--hover-bg':'#282c45',
+      '--topbar-bg':'rgba(15,17,32,.92)','--tabs-bg':'#232638',
+      '--badge-bg':'#2a2d42','--badge-fg':'#8b7fd4',
+      '--toast-bg':'#e8e5da','--toast-fg':'#0f1120',
+      '--overlay-bg':'rgba(0,0,0,.65)' },
+    music:{ root:196, scale:[0,2,3,7,10], tempo:9000, wave:'sine' } },
+  coffee: { name:'Кофейня', icon:'☕',
+    vars:{ '--paper':'#f0e6da','--card':'#fffaf4','--ink':'#332018','--ink-soft':'#563528',
+      '--muted':'#94705e','--line':'#e0cdb8','--accent':'#7a4a2b',
+      '--input-bg':'#f7ede0','--hover-bg':'#ede0cf',
+      '--topbar-bg':'rgba(240,230,218,.92)','--tabs-bg':'#e0cdb8',
+      '--badge-bg':'#e0cdb8','--badge-fg':'#6b3f23' },
+    music:{ root:261.63, scale:[0,2,4,5,7,9,10], tempo:8000, wave:'triangle' } }
+};
+
+/* =========================================================
+   МУЗЫКА (фоновая)
+   ========================================================= */
+class AmbientMusic {
+  constructor(){
+    this.ctx = null; this.master = null; this.playing = false;
+    this.timer = null; this.padNodes = []; this.mood = null;
+    this.volume = 0.22;
+  }
+  init(){
+    if(this.ctx) return;
+    try{
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.volume;
+      this.master.connect(this.ctx.destination);
+    }catch(e){ console.warn('Web Audio недоступен', e); }
+  }
+  setVolume(v){ this.volume = v; if(this.master) this.master.gain.value = v; }
+  setMood(mood){
+    this.mood = mood;
+    if(this.playing){ this.stopInternal(); this.startInternal(); }
+  }
+  async start(){
+    if(!this.mood) return false;
+    this.init();
+    if(!this.ctx) return false;
+    try{ await this.ctx.resume(); }catch(e){}
+    this.playing = true;
+    this.startInternal();
+    return true;
+  }
+  stop(){ this.playing = false; this.stopInternal(); }
+  startInternal(){ this.buildPad(); this.scheduleNote(); }
+  stopInternal(){
+    clearTimeout(this.timer);
+    this.padNodes.forEach(n => {
+      try{ n.osc.stop(); if(n.lfo) n.lfo.stop(); n.gain.disconnect(); }catch(e){}
+    });
+    this.padNodes = [];
+  }
+  buildPad(){
+    const m = this.mood;
+    [0, 1].forEach(i => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
+      const lfo = this.ctx.createOscillator();
+      const lfoGain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = m.root / 2;
+      osc.detune.value = (i === 0 ? -4 : 4);
+      filter.type = 'lowpass';
+      filter.frequency.value = 500;
+      gain.gain.value = 0.05;
+      lfo.frequency.value = 0.04 + i * 0.02;
+      lfoGain.gain.value = 0.025;
+      lfo.connect(lfoGain); lfoGain.connect(gain.gain); lfo.start();
+      osc.connect(filter); filter.connect(gain); gain.connect(this.master);
+      osc.start();
+      this.padNodes.push({ osc, gain, lfo });
+    });
+  }
+  scheduleNote(){
+    if(!this.playing) return;
+    const m = this.mood;
+    const delay = m.tempo * (0.7 + Math.random() * 0.6);
+    this.timer = setTimeout(() => {
+      if(!this.playing) return;
+      this.playNote();
+      this.scheduleNote();
+    }, delay);
+  }
+  playNote(){
+    const m = this.mood;
+    const semis = m.scale[Math.floor(Math.random() * m.scale.length)];
+    const octave = Math.random() < 0.5 ? 1 : 2;
+    const freq = m.root * Math.pow(2, semis / 12) * octave;
+    const now = this.ctx.currentTime;
+    const dur = 2.5 + Math.random() * 2.5;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = m.wave === 'triangle' ? 'triangle' : 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.13, now + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.connect(gain); gain.connect(this.master);
+    osc.start(now); osc.stop(now + dur + 0.1);
+  }
+}
+const musicEngine = new AmbientMusic();
+
+/* =========================================================
+   ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+   ========================================================= */
+let state = null;
+let viewingProfileId = null;
+let feedFilter = 'all';
+let searchQuery = '';
+let lockTimer = null;
+let loginAttempts = 0;
+let viewerMode = false;
+
+/* =========================================================
+   УТИЛИТЫ
+   ========================================================= */
+function uid(){ return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+function fmtDate(ts){
+  return new Date(ts).toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'});
+}
+function fmtSize(bytes){
+  if(bytes < 1024) return bytes + ' Б';
+  if(bytes < 1048576) return (bytes/1024).toFixed(0) + ' КБ';
+  return (bytes/1048576).toFixed(1) + ' МБ';
+}
+function hashPass(pw){
+  let h = 5381;
+  const s = 'salt-ugolok-v1::' + pw;
+  for(let i=0;i<s.length;i++) h = ((h<<5)+h) ^ s.charCodeAt(i);
+  return (h>>>0).toString(16);
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* =========================================================
+   ТЕМА
+   ========================================================= */
+function applyUITheme(key){
+  const t = UI_THEMES[key] || UI_THEMES.paper;
+  const merged = Object.assign({}, BASE_VARS, t.vars);
+  Object.entries(merged).forEach(([k,v]) =>
+    document.documentElement.style.setProperty(k, v));
+  musicEngine.setMood(t.music);
+  updateMusicBtn();
+}
+function updateMusicBtn(){
+  const btn = document.getElementById('musicBtn');
+  if(!btn) return;
+  btn.textContent = musicEngine.playing ? '🎵' : '🔇';
+  btn.title = musicEngine.playing ? 'Выключить музыку' : 'Включить музыку';
+}
+
+/* =========================================================
+   СЕССИЯ
+   ========================================================= */
+function saveSession(userId, remember){
+  const data = { userId, expires: remember ? Date.now() + REMEMBER_MS : 0 };
+  try{ localStorage.setItem(SESSION_KEY, JSON.stringify(data)); }catch(e){}
+}
+function getSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(s.expires && s.expires < Date.now()){
+      localStorage.removeItem(SESSION_KEY); return null;
+    }
+    return s;
+  }catch(e){ return null; }
+}
+function clearSession(){
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+}
+
+/* =========================================================
+   ДАННЫЕ
+   ========================================================= */
+function defaultState(){
+  const now = Date.now(), DAY = 86400000;
+  return {
+    authSetup:false, currentUserId:'u1', uiTheme:'paper', musicOn:true, musicVolume:0.22,
+    users:[
+      { id:'u1', name:'Хозяин уголка',
+        bio:'Здесь живут мои фотографии, стихи и книги. Заходите в гости 💛',
+        avatar:'', avatarEmoji:'', passHash:null, stickers:['🌟','📚'],
+        theme:{ accent:'#b8622e', bg:'#fdf8f0', bgImage:'', bgGradient:'' } },
+      { id:'u2', name:'Вика',
+        bio:'Люблю поэзию и плёночные фотографии. Пишу по ночам.',
+        avatar:'', avatarEmoji:'', passHash: hashPass('Fixl'), stickers:['🌙','🌸'],
+        theme:{ accent:'#5b7fa8', bg:'#f2f6fb', bgImage:'', bgGradient:'' } },
+      { id:'u3', name:'Даня',
+        bio:'Люблю природу и бобров 🦫 Иногда пишу заметки о лесных прогулках.',
+        avatar:'', avatarEmoji:'🦫', passHash: hashPass('1234'),
+        stickers:['🦫','🍀','🌿'],
+        theme:{ accent:'#8a6d3b', bg:'#f5efe2', bgImage:'', bgGradient:'' } }
+    ],
+    posts:[
+      { id:'p1', userId:'u1', type:'poem', title:'Мой уголок',
+        content:'Здесь тихо. Здесь пахнет бумагой и чаем,\nЗдесь строчки ложатся неровной рукой.\nЯ в этот мирок никого не пускаю —\nНо дверь оставляю открытой. Такой.',
+        image:'', likes:[], date: now - DAY*3 },
+      { id:'p2', userId:'u2', type:'poem', title:'Осеннее',
+        content:'Листья падают медленно, будто не знают,\nЧто земля их уже не отпустит назад.\nЯ стою на крыльце и о чём-то вздыхаю,\nИ дождинки на куртке моей блестят.',
+        image:'', likes:[], date: now - DAY*2 },
+      { id:'p3', userId:'u3', type:'photo', title:'Бобровая плотина',
+        content:'Гулял по лесу и наткнулся на настоящую плотину. Бобры — удивительные инженеры 🦫',
+        image:'', likes:[], date: now - DAY }
+    ]
+  };
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : defaultState();
+    if(!state || !state.users || !state.users.length) state = defaultState();
+  }catch(e){ state = defaultState(); }
+  state.posts = state.posts || [];
+  state.uiTheme = state.uiTheme || 'paper';
+  if(typeof state.musicOn !== 'boolean') state.musicOn = true;
+  if(typeof state.musicVolume !== 'number') state.musicVolume = 0.22;
+
+  const oldAnya = state.users.find(u => u.id === 'u2' && u.name === 'Аня');
+  if(oldAnya){
+    oldAnya.name = 'Вика';
+    oldAnya.passHash = hashPass('Fixl');
+    oldAnya.bio = 'Люблю поэзию и плёночные фотографии. Пишу по ночам.';
+  }
+  if(!state.users.find(u => u.id === 'u3')){
+    state.users.push({
+      id:'u3', name:'Даня',
+      bio:'Люблю природу и бобров 🦫 Иногда пишу заметки о лесных прогулках.',
+      avatar:'', avatarEmoji:'🦫', passHash: hashPass('1234'),
+      stickers:['🦫','🍀','🌿'],
+      theme:{ accent:'#8a6d3b', bg:'#f5efe2', bgImage:'', bgGradient:'' }
+    });
+  }
+
+  state.users.forEach(u => {
+    u.theme = Object.assign({accent:'#b8622e', bg:'#fdf8f0', bgImage:'', bgGradient:''}, u.theme || {});
+    u.avatar = u.avatar || '';
+    u.avatarEmoji = u.avatarEmoji || '';
+    u.bio = u.bio || '';
+    u.passHash = u.passHash || null;
+    u.stickers = Array.isArray(u.stickers) ? u.stickers : [];
+  });
+  state.posts.forEach(p => { p.likes = p.likes || []; });
+  if(!state.users.find(u => u.id === state.currentUserId)) state.currentUserId = state.users[0].id;
+  viewingProfileId = state.currentUserId;
+}
+
+function save(){
+  if(viewerMode) return true;
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); return true; }
+  catch(e){
+    alert('Не хватило места в хранилище браузера 😔\n\nСкорее всего, слишком много/слишком тяжёлые файлы (видео, аудио, PDF или фото). Удалите пару старых записей или загрузите файлы поменьше.');
+    return false;
+  }
+}
+
+/* =========================================================
+   ХЕЛПЕРЫ
+   ========================================================= */
+function currentUser(){ return viewerMode ? null : state.users.find(u => u.id === state.currentUserId); }
+function userById(id){ return state.users.find(u => u.id === id); }
+function initial(name){ return (name || '?').trim().charAt(0).toUpperCase(); }
+
+function avatarHTML(user, cls){
+  if(user && user.avatarEmoji){
+    const size = cls.includes('profile-avatar') ? '58px' : '22px';
+    return `<div class="${cls}" style="font-size:${size};line-height:1;background:var(--tabs-bg)">${user.avatarEmoji}</div>`;
+  }
+  if(user && user.avatar) return `<img class="${cls}" src="${user.avatar}" alt="">`;
+  return `<div class="${cls}">${esc(initial(user ? user.name : '?'))}</div>`;
+}
+
+function readImage(file, maxSide = 1100, quality = 0.72){
+  return new Promise((resolve, reject) => {
+    if(!file) return resolve('');
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > maxSide || height > maxSide){
+          const k = maxSide / Math.max(width, height);
+          width = Math.round(width * k); height = Math.round(height * k);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('bad image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('read error'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function readPDF(file){
+  return new Promise((resolve, reject) => {
+    if(file.size > PDF_MAX){
+      return reject(new Error(`PDF больше ${fmtSize(PDF_MAX)}. Попробуйте файл поменьше.`));
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve({ data: reader.result, name: file.name, size: file.size });
+    reader.onerror = () => reject(new Error('Не удалось прочитать PDF'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function readMedia(file, maxSize, kind){
+  return new Promise((resolve, reject) => {
+    if(file.size > maxSize){
+      return reject(new Error(`${kind} больше ${fmtSize(maxSize)}. Попробуйте файл поменьше.`));
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve({ data: reader.result, name: file.name, size: file.size });
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* =========================================================
+   ЭКРАН ВХОДА
+   ========================================================= */
+function renderGate(){
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('gateScreen').style.display = 'flex';
+  if(!state.authSetup) renderSetup();
+  else renderLogin();
+}
+
+function renderSetup(){
+  const owner = state.users[0] || { name:'' };
+  document.getElementById('gateScreen').innerHTML = `
+    <div class="gate-card">
+      <h1 class="serif">Ваш личный уголок</h1>
+      <p class="lead">Придумайте пароль — только вы и ваши друзья сможете публиковать записи.</p>
+      <div class="gate-err" id="gateErr"></div>
+      <label class="field"><span>Ваше имя</span>
+        <input type="text" id="setupName" value="${esc(owner.name)}" maxlength="40">
+      </label>
+      <label class="field"><span>Пароль</span>
+        <input type="password" id="setupPass" placeholder="Минимум 4 символа" autocomplete="new-password">
+      </label>
+      <label class="field"><span>Повторите пароль</span>
+        <input type="password" id="setupPass2" autocomplete="new-password">
+      </label>
+      <button class="btn btn-primary gate-btn" id="setupBtn">Создать уголок</button>
+      <p class="gate-hint">Профили Вики (пароль <b>Fixl</b>) и Дани (пароль <b>1234</b>) уже готовы.</p>
+    </div>`;
+  const errEl = document.getElementById('gateErr');
+  const showErr = m => { errEl.textContent = m; errEl.classList.add('show'); };
+  document.getElementById('setupBtn').onclick = () => {
+    const name = document.getElementById('setupName').value.trim();
+    const p1 = document.getElementById('setupPass').value;
+    const p2 = document.getElementById('setupPass2').value;
+    if(!name) return showErr('Введите имя');
+    if(p1.length < 4) return showErr('Пароль должен быть не короче 4 символов');
+    if(p1 !== p2) return showErr('Пароли не совпадают');
+    owner.name = name;
+    owner.passHash = hashPass(p1);
+    state.authSetup = true;
+    state.currentUserId = owner.id;
+    if(!save()) return showErr('Не удалось сохранить данные');
+    saveSession(owner.id, true);
+    startApp();
+  };
+}
+
+function renderLogin(){
+  document.getElementById('gateScreen').innerHTML = `
+    <div class="gate-card">
+      <h1 class="serif">Вход в уголок</h1>
+      <p class="lead">Хозяева и друзья входят по паролю. Любой желающий может посмотреть записи как зритель.</p>
+      <div class="gate-err" id="gateErr"></div>
+      <label class="field"><span>Кто вы</span>
+        <select class="full" id="loginUser">
+          ${state.users.map(u => `<option value="${u.id}" ${u.id === state.currentUserId ? 'selected' : ''}>${esc(u.name)}${u.id === 'u3' ? ' 🦫' : ''}</option>`).join('')}
+        </select>
+      </label>
+      <label class="field"><span>Пароль</span>
+        <input type="password" id="loginPass" autocomplete="current-password">
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin:2px 0 6px;cursor:pointer">
+        <input type="checkbox" id="loginRemember" checked> Запомнить меня на 30 дней
+      </label>
+      <button class="btn btn-primary gate-btn" id="loginBtn">Войти</button>
+
+      <div class="gate-divider">или</div>
+
+      <button class="btn btn-ghost gate-btn" id="viewerBtn">👁 Войти как зритель (без пароля)</button>
+      <p class="gate-hint">Зритель может читать стихи и книги, смотреть видео и слушать музыку, но не может публиковать, лайкать или менять профили.</p>
+    </div>`;
+
+  const errEl = document.getElementById('gateErr');
+  const passEl = document.getElementById('loginPass');
+  passEl.focus();
+  passEl.addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('loginBtn').click(); });
+
+  document.getElementById('loginBtn').onclick = () => {
+    const userId = document.getElementById('loginUser').value;
+    const pw = passEl.value;
+    const remember = document.getElementById('loginRemember').checked;
+    const user = state.users.find(u => u.id === userId);
+    if(!user) return;
+    if(loginAttempts >= 5){
+      errEl.textContent = 'Слишком много неудачных попыток. Перезагрузите страницу.';
+      errEl.classList.add('show'); return;
+    }
+    if(!user.passHash || hashPass(pw) !== user.passHash){
+      loginAttempts++;
+      errEl.textContent = 'Неверный пароль. Попробуйте ещё раз.';
+      errEl.classList.add('show');
+      passEl.value = ''; return;
+    }
+    loginAttempts = 0;
+    viewerMode = false;
+    state.currentUserId = user.id;
+    saveSession(user.id, remember);
+    startApp();
+  };
+
+  document.getElementById('viewerBtn').onclick = () => {
+    viewerMode = true;
+    startApp();
+  };
+}
+
+/* =========================================================
+   СТАРТ/ВЫХОД
+   ========================================================= */
+async function startApp(){
+  document.getElementById('gateScreen').style.display = 'none';
+  document.getElementById('gateScreen').innerHTML = '';
+  document.getElementById('appRoot').style.display = '';
+
+  viewingProfileId = viewerMode ? state.users[0].id : state.currentUserId;
+
+  document.getElementById('addPostBtn').style.display = viewerMode ? 'none' : '';
+  document.getElementById('addFriendBtn').style.display = viewerMode ? 'none' : '';
+  document.getElementById('settingsBtn').style.display = viewerMode ? 'none' : '';
+
+  applyUITheme(state.uiTheme);
+  musicEngine.setVolume(state.musicVolume);
+  renderAll();
+  resetLockTimer();
+
+  if(state.musicOn){
+    const ok = await musicEngine.start();
+    updateMusicBtn();
+    if(!ok){
+      const retry = async () => { await musicEngine.start(); updateMusicBtn(); };
+      document.addEventListener('click', retry, { once: true });
+    }
+  } else {
+    updateMusicBtn();
+  }
+}
+
+function logout(expired){
+  clearTimeout(lockTimer);
+  clearSession();
+  musicEngine.stop();
+  viewerMode = false;
+  load();
+  document.getElementById('appRoot').style.display = 'none';
+  document.getElementById('gateScreen').style.display = 'flex';
+  renderGate();
+  if(expired) toast('Сессия истекла — войдите снова');
+}
+
+function resetLockTimer(){
+  clearTimeout(lockTimer);
+  if(viewerMode) return;
+  lockTimer = setTimeout(() => {
+    if(document.getElementById('appRoot').style.display !== 'none') logout(true);
+  }, AUTOLOCK_MS);
+}
+
+['mousemove','keydown','click','scroll','touchstart'].forEach(ev => {
+  document.addEventListener(ev, () => {
+    if(document.getElementById('appRoot').style.display !== 'none') resetLockTimer();
+  }, {passive:true});
+});
+
+/* =========================================================
+   РЕНДЕР
+   ========================================================= */
+function renderCurrentUser(){
+  const chip = document.getElementById('currentUserChip');
+  if(viewerMode){
+    chip.innerHTML = `<span style="font-size:16px">👁</span> <span>Зритель</span>`;
+  } else {
+    const u = currentUser();
+    chip.innerHTML = `${avatarHTML(u, 'avatar')} <span>${esc(u.name)}</span>`;
+  }
+  updateMusicBtn();
+}
+
+function postCardHTML(post){
+  const author = userById(post.userId) || { name:'Неизвестный', avatar:'' };
+  const isMine = !viewerMode && post.userId === state.currentUserId;
+  const long = (post.content || '').length > 420;
+  const likes = post.likes || [];
+  const liked = !viewerMode && likes.includes(state.currentUserId);
+
+  // Для видео и музыки картинка идёт как постер/обложка, отдельно её не выводим
+  const showImg = post.image && post.type !== 'video' && post.type !== 'music';
+  const img = showImg
+    ? `<img class="card-img" src="${post.image}" alt="${esc(post.title)}" loading="lazy">` : '';
+
+  const videoBlock = post.videoData ? `
+    <video class="card-media" controls preload="metadata"
+      ${post.image ? `poster="${post.image}"` : ''}
+      src="${post.videoData}"></video>` : '';
+
+  const audioBlock = post.audioData ? `
+    <div class="audio-attachment">
+      ${post.image
+        ? `<img class="audio-cover" src="${post.image}" alt="">`
+        : `<div class="audio-cover audio-cover-placeholder">🎵</div>`}
+      <div class="audio-info">
+        <div class="audio-name">${esc(post.audioName || 'Трек')}</div>
+        <div class="audio-meta">Аудио${post.audioSize ? ' · ' + fmtSize(post.audioSize) : ''}</div>
+        <audio controls preload="metadata" src="${post.audioData}"></audio>
+      </div>
+    </div>` : '';
+
+  const text = post.content
+    ? `<p class="card-text ${long ? 'clamped' : ''}" id="txt-${post.id}">${esc(post.content)}</p>
+       ${long ? `<button class="more-btn" data-more="${post.id}">Читать дальше →</button>` : ''}` : '';
+
+  const pdfBlock = post.pdfData ? `
+    <div class="pdf-attachment">
+      <div class="pdf-icon">📕</div>
+      <div class="pdf-info">
+        <div class="pdf-name">${esc(post.pdfName || 'книга.pdf')}</div>
+        <div class="pdf-size">PDF${post.pdfSize ? ' · ' + fmtSize(post.pdfSize) : ''}</div>
+      </div>
+      <a href="${post.pdfData}" target="_blank" rel="noopener" class="btn btn-ghost">Открыть</a>
+      <a href="${post.pdfData}" download="${esc(post.pdfName || 'book.pdf')}" class="btn btn-ghost" title="Скачать">⭳</a>
+    </div>` : '';
+
+  let footer = '';
+  if(viewerMode){
+    if(likes.length){
+      footer = `<div class="card-foot"><span class="like-btn" style="cursor:default">❤️ ${likes.length}</span></div>`;
+    }
+  } else {
+    footer = `
+      <div class="card-foot">
+        <div class="foot-left">
+          <button class="like-btn ${liked ? 'liked' : ''}" data-like="${post.id}">
+            ${liked ? '❤️' : '🤍'} ${likes.length || ''}
+          </button>
+        </div>
+        ${isMine ? `<button class="del-btn" data-del="${post.id}">Удалить</button>` : ''}
+      </div>`;
+  }
+
+  return `
+    <article class="card" data-id="${post.id}">
+      <div class="card-head">
+        ${avatarHTML(author, 'avatar')}
+        <div>
+          <div class="card-author" data-author="${author.id}">${esc(author.name)}</div>
+          <div class="card-date">${fmtDate(post.date)}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <span class="badge">${TYPES[post.type] || 'Запись'}</span>
+        ${post.title ? `<h3 class="card-title">${esc(post.title)}</h3>` : ''}
+        ${img}
+        ${videoBlock}
+        ${audioBlock}
+        ${pdfBlock}
+        ${text}
+      </div>
+      ${footer}
+    </article>`;
+}
+
+function matchesSearch(post, q){
+  if(!q) return true;
+  const ql = q.toLowerCase();
+  const author = userById(post.userId);
+  return (post.title||'').toLowerCase().includes(ql)
+      || (post.content||'').toLowerCase().includes(ql)
+      || (post.pdfName||'').toLowerCase().includes(ql)
+      || (post.videoName||'').toLowerCase().includes(ql)
+      || (post.audioName||'').toLowerCase().includes(ql)
+      || (author && author.name.toLowerCase().includes(ql));
+}
+
+function renderFeed(){
+  const grid = document.getElementById('feedGrid');
+  let posts = [...state.posts].sort((a,b) => b.date - a.date);
+  if(feedFilter !== 'all') posts = posts.filter(p => p.type === feedFilter);
+  if(searchQuery) posts = posts.filter(p => matchesSearch(p, searchQuery));
+
+  if(!posts.length){
+    grid.innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        <h3 class="serif">${searchQuery ? 'Ничего не найдено' : 'Пока здесь пусто'}</h3>
+        <p>${searchQuery ? 'Попробуйте другой запрос.' : (viewerMode ? 'Загляните позже 🌿' : 'Нажмите «+ Добавить», чтобы опубликовать первую запись.')}</p>
+      </div>`;
+    return;
+  }
+  grid.innerHTML = posts.map(postCardHTML).join('');
+}
+
+function renderProfile(){
+  const user = userById(viewingProfileId) || state.users[0];
+  const isMe = !viewerMode && user.id === state.currentUserId;
+  const myPosts = state.posts.filter(p => p.userId === user.id).sort((a,b) => b.date - a.date);
+  const counts = { photo:0, poem:0, book:0, video:0, music:0 };
+  myPosts.forEach(p => { if(counts[p.type] !== undefined) counts[p.type]++; });
+
+  const coverBase = user.theme.bgGradient
+    ? `background:${user.theme.bgGradient};`
+    : `background-color:${esc(user.theme.bg)};`;
+  const coverImage = user.theme.bgImage
+    ? `background-image:url('${user.theme.bgImage}');background-size:cover;background-position:center;` : '';
+  const coverStyle = coverBase + coverImage;
+
+  const coverStickers = (user.stickers || []).slice(0, STICKER_POS.length).map((s, i) => {
+    const p = STICKER_POS[i];
+    return `<span class="cover-sticker" style="--x:${p.x}%;--y:${p.y}%;--r:${p.r}deg">${s}</span>`;
+  }).join('');
+
+  const body = myPosts.length
+    ? `<div class="grid">${myPosts.map(postCardHTML).join('')}</div>`
+    : `<div class="empty">
+         <h3 class="serif">${isMe ? 'У вас' : 'У ' + esc(user.name)} ещё нет записей</h3>
+         <p>${isMe ? 'Нажмите «+ Добавить» — и здесь появится первый стих, фото, книга, видео или трек.' : 'Загляните позже 🌿'}</p>
+       </div>`;
+
+  document.getElementById('profileView').innerHTML = `
+    <div class="profile">
+      <div class="profile-cover" style="${coverStyle}">${coverStickers}</div>
+      <div class="profile-main">
+        ${avatarHTML(user, 'profile-avatar')}
+        <div class="profile-info">
+          <h1 class="profile-name serif" style="color:${esc(user.theme.accent)}">${esc(user.name)}</h1>
+          <p class="profile-bio">${esc(user.bio) || '<i style="opacity:.6">Пока без описания…</i>'}</p>
+        </div>
+        ${isMe ? `<button class="btn btn-ghost" id="editProfileBtn" style="margin-bottom:6px">✎ Оформить страницу</button>` : ''}
+      </div>
+      <div class="profile-stats">
+        <div class="stat"><b>${counts.photo}</b><span>фото</span></div>
+        <div class="stat"><b>${counts.poem}</b><span>стихов</span></div>
+        <div class="stat"><b>${counts.book}</b><span>книг</span></div>
+        <div class="stat"><b>${counts.video}</b><span>видео</span></div>
+        <div class="stat"><b>${counts.music}</b><span>треков</span></div>
+        <div class="stat"><b>${myPosts.length}</b><span>всего</span></div>
+      </div>
+    </div>
+    <h2 class="section-title">Записи ${isMe ? 'на моей странице' : esc(user.name)}</h2>
+    ${body}
+  `;
+  if(isMe) document.getElementById('editProfileBtn').onclick = openProfileModal;
+}
+
+function renderAll(){ renderCurrentUser(); renderFeed(); renderProfile(); }
+
+/* =========================================================
+   НАВИГАЦИЯ
+   ========================================================= */
+function switchView(view){
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.view === view));
+  document.getElementById('feedView').style.display = view === 'feed' ? '' : 'none';
+  document.getElementById('profileView').style.display = view === 'profile' ? '' : 'none';
+  if(view === 'profile') renderProfile(); else renderFeed();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function openAuthorProfile(userId){ viewingProfileId = userId; switchView('profile'); }
+
+/* =========================================================
+   МОДАЛКИ
+   ========================================================= */
+function closeModal(){ document.getElementById('modalRoot').innerHTML = ''; }
+
+/* --- Новая запись (фото/стих/книга/видео/музыка) --- */
+function openPostModal(){
+  if(viewerMode){ toast('Зритель не может публиковать'); return; }
+  let type = 'photo';
+  let imageData = '';
+  let pdfData = null, pdfName = '', pdfSize = 0;
+  let videoData = null, videoName = '', videoSize = 0;
+  let audioData = null, audioName = '', audioSize = 0;
+
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2 class="serif">Новая запись</h2>
+        <div class="type-picker">
+          <button class="type-btn active" data-type="photo">📷 Фото</button>
+          <button class="type-btn" data-type="poem">✒️ Стих</button>
+          <button class="type-btn" data-type="book">📚 Книга</button>
+          <button class="type-btn" data-type="video">🎬 Видео</button>
+          <button class="type-btn" data-type="music">🎵 Музыка</button>
+        </div>
+        <label class="field">
+          <span>Заголовок</span>
+          <input type="text" id="pTitle" placeholder="Например: «Вечер на балконе»">
+        </label>
+        <label class="field" id="imgField">
+          <span id="imgLabel">Фотография</span>
+          <input type="file" id="pImage" accept="image/*">
+        </label>
+        <div id="imgPreviewBox"></div>
+        <label class="field" id="videoField" style="display:none">
+          <span>Видеофайл (до ${fmtSize(VIDEO_MAX)})</span>
+          <input type="file" id="pVideo" accept="video/*">
+        </label>
+        <div id="videoPreviewBox"></div>
+        <label class="field" id="audioField" style="display:none">
+          <span>Аудиофайл (до ${fmtSize(AUDIO_MAX)})</span>
+          <input type="file" id="pAudio" accept="audio/*">
+        </label>
+        <div id="audioPreviewBox"></div>
+        <label class="field" id="pdfField" style="display:none">
+          <span>PDF файл книги (до ${fmtSize(PDF_MAX)})</span>
+          <input type="file" id="pPdf" accept="application/pdf,.pdf">
+        </label>
+        <div id="pdfPreviewBox"></div>
+        <label class="field">
+          <span id="contentLabel">Подпись к фото</span>
+          <textarea id="pContent" placeholder="Расскажите пару слов…"></textarea>
+        </label>
+        <p style="font-size:12px;color:var(--muted);margin:0;line-height:1.5">
+          ⚠️ Медиафайлы хранятся прямо в браузере — большой файл может не поместиться в хранилище. Для видео лучше короткие клипы.
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="cancelBtn">Отмена</button>
+          <button class="btn btn-primary" id="saveBtn">Опубликовать</button>
+        </div>
+      </div>
+    </div>`;
+
+  const overlay = document.getElementById('overlay');
+  const imgField = document.getElementById('imgField');
+  const imgLabel = document.getElementById('imgLabel');
+  const pdfField = document.getElementById('pdfField');
+  const videoField = document.getElementById('videoField');
+  const audioField = document.getElementById('audioField');
+  const contentLabel = document.getElementById('contentLabel');
+  const contentEl = document.getElementById('pContent');
+  const previewBox = document.getElementById('imgPreviewBox');
+  const pdfBox = document.getElementById('pdfPreviewBox');
+  const videoPreviewBox = document.getElementById('videoPreviewBox');
+  const audioPreviewBox = document.getElementById('audioPreviewBox');
+
+  function applyType(t){
+    type = t;
+    document.querySelectorAll('.type-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.type === t));
+
+    imgField.style.display = 'none';
+    pdfField.style.display = 'none';
+    videoField.style.display = 'none';
+    audioField.style.display = 'none';
+
+    if(t === 'photo'){
+      imgField.style.display = '';
+      imgLabel.textContent = 'Фотография';
+      contentLabel.textContent = 'Подпись к фото';
+      contentEl.placeholder = 'Расскажите пару слов…';
+      contentEl.style.minHeight = '90px';
+    } else if(t === 'poem'){
+      contentLabel.textContent = 'Текст стихотворения';
+      contentEl.placeholder = 'Здесь тихо. Здесь пахнет бумагой и чаем…';
+      contentEl.style.minHeight = '200px';
+    } else if(t === 'book'){
+      imgField.style.display = '';
+      pdfField.style.display = '';
+      imgLabel.textContent = 'Обложка книги (необязательно)';
+      contentLabel.textContent = 'Аннотация книги';
+      contentEl.placeholder = 'О чём эта книга и почему её стоит прочитать…';
+      contentEl.style.minHeight = '140px';
+    } else if(t === 'video'){
+      imgField.style.display = '';
+      videoField.style.display = '';
+      imgLabel.textContent = 'Обложка видео (необязательно)';
+      contentLabel.textContent = 'Описание видео';
+      contentEl.placeholder = 'О чём это видео…';
+      contentEl.style.minHeight = '100px';
+    } else if(t === 'music'){
+      imgField.style.display = '';
+      audioField.style.display = '';
+      imgLabel.textContent = 'Обложка трека (необязательно)';
+      contentLabel.textContent = 'Описание трека';
+      contentEl.placeholder = 'Об исполнителе, настроении, истории записи…';
+      contentEl.style.minHeight = '100px';
+    }
+  }
+  document.querySelectorAll('.type-btn').forEach(b => { b.onclick = () => applyType(b.dataset.type); });
+  applyType('photo');
+
+  document.getElementById('pImage').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{
+      imageData = await readImage(f, 1100, 0.72);
+      previewBox.innerHTML = `<img class="preview-img" src="${imageData}" alt="">`;
+    }catch(_){ toast('Не удалось загрузить картинку'); }
+  };
+
+  document.getElementById('pPdf').onchange = async e => {
+    const f = e.target.files[0];
+    if(!f){ pdfData = null; pdfName = ''; pdfSize = 0; pdfBox.innerHTML = ''; return; }
+    try{
+      const r = await readPDF(f);
+      pdfData = r.data; pdfName = r.name; pdfSize = r.size;
+      pdfBox.innerHTML = `
+        <div class="pdf-attachment" style="margin-bottom:16px">
+          <div class="pdf-icon">📕</div>
+          <div class="pdf-info">
+            <div class="pdf-name">${esc(pdfName)}</div>
+            <div class="pdf-size">PDF · ${fmtSize(pdfSize)}</div>
+          </div>
+        </div>`;
+      toast('PDF прикреплён ✓');
+    }catch(err){
+      toast(err.message);
+      e.target.value = '';
+      pdfData = null; pdfName = ''; pdfSize = 0; pdfBox.innerHTML = '';
+    }
+  };
+
+  document.getElementById('pVideo').onchange = async e => {
+    const f = e.target.files[0];
+    if(!f){ videoData = null; videoName = ''; videoSize = 0; videoPreviewBox.innerHTML = ''; return; }
+    try{
+      const r = await readMedia(f, VIDEO_MAX, 'Видео');
+      videoData = r.data; videoName = r.name; videoSize = r.size;
+      videoPreviewBox.innerHTML = `
+        <video class="preview-img" style="max-height:200px;object-fit:contain;background:#000"
+          controls preload="metadata" src="${videoData}"></video>`;
+      toast('Видео прикреплено ✓');
+    }catch(err){
+      toast(err.message);
+      e.target.value = '';
+      videoData = null; videoName = ''; videoSize = 0; videoPreviewBox.innerHTML = '';
+    }
+  };
+
+  document.getElementById('pAudio').onchange = async e => {
+    const f = e.target.files[0];
+    if(!f){ audioData = null; audioName = ''; audioSize = 0; audioPreviewBox.innerHTML = ''; return; }
+    try{
+      const r = await readMedia(f, AUDIO_MAX, 'Аудио');
+      audioData = r.data; audioName = r.name; audioSize = r.size;
+      audioPreviewBox.innerHTML = `
+        <div class="audio-attachment" style="margin-bottom:16px">
+          <div class="audio-cover audio-cover-placeholder">🎵</div>
+          <div class="audio-info">
+            <div class="audio-name">${esc(audioName)}</div>
+            <div class="audio-meta">Аудио · ${fmtSize(audioSize)}</div>
+            <audio controls preload="metadata" src="${audioData}"></audio>
+          </div>
+        </div>`;
+      toast('Аудио прикреплено ✓');
+    }catch(err){
+      toast(err.message);
+      e.target.value = '';
+      audioData = null; audioName = ''; audioSize = 0; audioPreviewBox.innerHTML = '';
+    }
+  };
+
+  document.getElementById('cancelBtn').onclick = closeModal;
+  overlay.onclick = e => { if(e.target === overlay) closeModal(); };
+
+  document.getElementById('saveBtn').onclick = () => {
+    const title = document.getElementById('pTitle').value.trim();
+    const content = contentEl.value.trim();
+    if(type === 'photo' && !imageData){ toast('Добавьте фотографию 📷'); return; }
+    if(type === 'poem' && !content){ toast('Стихотворение не может быть пустым ✒️'); return; }
+    if(type === 'book' && !content && !pdfData){ toast('Добавьте аннотацию или PDF книгу 📚'); return; }
+    if(type === 'video' && !videoData){ toast('Добавьте видеофайл 🎬'); return; }
+    if(type === 'music' && !audioData){ toast('Добавьте аудиофайл 🎵'); return; }
+    if(!title && !content && !imageData && !pdfData && !videoData && !audioData){
+      toast('Заполните хотя бы заголовок или текст'); return;
+    }
+
+    const post = {
+      id: uid(), userId: state.currentUserId, type,
+      title: title || (TYPES[type] + ' без названия'),
+      content, image: imageData, likes: [], date: Date.now()
+    };
+    if(pdfData){ post.pdfData = pdfData; post.pdfName = pdfName; post.pdfSize = pdfSize; }
+    if(videoData){ post.videoData = videoData; post.videoName = videoName; post.videoSize = videoSize; }
+    if(audioData){ post.audioData = audioData; post.audioName = audioName; post.audioSize = audioSize; }
+
+    state.posts.push(post);
+    if(!save()){ state.posts.pop(); return; }
+    closeModal();
+    toast('Опубликовано ✨');
+    renderFeed();
+    if(document.getElementById('profileView').style.display !== 'none') renderProfile();
+  };
+}
+
+/* --- Оформление профиля + наклейки + градиенты --- */
+function openProfileModal(){
+  if(viewerMode){ toast('Зритель не может менять профиль'); return; }
+  const user = currentUser();
+  let avatarData = user.avatar || '';
+  let bgImageData = user.theme.bgImage || '';
+  let selectedGradient = user.theme.bgGradient || '';
+  const stickerSet = new Set(user.stickers || []);
+
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2 class="serif">Оформление страницы</h2>
+        <div class="gate-err" id="mErr"></div>
+        <label class="field"><span>Имя</span>
+          <input type="text" id="mName" value="${esc(user.name)}" maxlength="40">
+        </label>
+        <label class="field"><span>О себе</span>
+          <textarea id="mBio" style="min-height:90px" placeholder="Пара слов о вас…">${esc(user.bio)}</textarea>
+        </label>
+        <label class="field"><span>Аватар</span>
+          <input type="file" id="mAvatar" accept="image/*">
+        </label>
+        <div id="avatarPreview"></div>
+        <div class="row">
+          <label class="field"><span>Акцентный цвет (имя, детали)</span>
+            <input type="color" id="mAccent" value="${esc(user.theme.accent)}">
+          </label>
+          <label class="field"><span>Цвет обложки (без градиента)</span>
+            <input type="color" id="mBg" value="${esc(user.theme.bg)}">
+          </label>
+        </div>
+
+        <div class="field">
+          <span>Градиент обложки</span>
+          <div class="gradient-picker" id="gradientPicker">
+            ${COVER_PRESETS.map((g, i) => `
+              <button type="button" class="gradient-swatch ${selectedGradient === g.bg ? 'active' : ''}"
+                data-gradient="${i}" title="${g.name}" style="background:${g.bg}"></button>
+            `).join('')}
+            <button type="button" class="gradient-swatch ${!selectedGradient ? 'active' : ''}"
+              data-gradient="none" title="Без градиента"
+              style="background:repeating-linear-gradient(45deg,#fff,#fff 6px,#e6dccd 6px,#e6dccd 12px);color:var(--muted);font-size:16px;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>
+        </div>
+
+        <label class="field"><span>Фоновая картинка обложки (необязательно)</span>
+          <input type="file" id="mBgImage" accept="image/*">
+        </label>
+        <div id="bgPreview"></div>
+
+        <h2 class="serif" style="margin:22px 0 10px;font-size:17px">Наклейки на обложку</h2>
+        <p class="sticker-counter" id="stickerCounter">Выбрано: ${stickerSet.size} из ${STICKER_MAX}</p>
+        <div class="sticker-picker" id="stickerPicker">
+          ${STICKER_PACK.map(s => `<button type="button" class="sticker-toggle ${stickerSet.has(s) ? 'active' : ''}" data-sticker="${s}">${s}</button>`).join('')}
+        </div>
+
+        <h2 class="serif" style="margin:22px 0 12px;font-size:17px">Смена пароля</h2>
+        <label class="field"><span>Новый пароль (оставьте пустым, чтобы не менять)</span>
+          <input type="password" id="mNewPass" placeholder="Минимум 4 символа" autocomplete="new-password">
+        </label>
+        <label class="field"><span>Повторите новый пароль</span>
+          <input type="password" id="mNewPass2" autocomplete="new-password">
+        </label>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="resetTheme">Сбросить фон</button>
+          <button class="btn btn-ghost" id="cancelBtn">Отмена</button>
+          <button class="btn btn-primary" id="saveBtn">Сохранить</button>
+        </div>
+      </div>
+    </div>`;
+
+  const overlay = document.getElementById('overlay');
+  const avBox = document.getElementById('avatarPreview');
+  const bgBox = document.getElementById('bgPreview');
+  const errEl = document.getElementById('mErr');
+  const counter = document.getElementById('stickerCounter');
+  const showErr = m => { errEl.textContent = m; errEl.classList.add('show'); };
+
+  const drawAv = () => { avBox.innerHTML = avatarData ? `<img class="preview-img" style="max-height:130px;width:130px;border-radius:50%" src="${avatarData}" alt="">` : ''; };
+  const drawBg = () => { bgBox.innerHTML = bgImageData ? `<img class="preview-img" src="${bgImageData}" alt="">` : ''; };
+  drawAv(); drawBg();
+
+  document.getElementById('mAvatar').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{ avatarData = await readImage(f, 320, 0.8); drawAv(); }catch(_){ toast('Ошибка загрузки'); }
+  };
+  document.getElementById('mBgImage').onchange = async e => {
+    const f = e.target.files[0]; if(!f) return;
+    try{ bgImageData = await readImage(f, 1200, 0.7); drawBg(); }catch(_){ toast('Ошибка загрузки'); }
+  };
+  document.getElementById('resetTheme').onclick = () => {
+    bgImageData = ''; drawBg();
+    selectedGradient = '';
+    document.getElementById('mBg').value = '#fdf8f0';
+    document.querySelectorAll('.gradient-swatch').forEach(b =>
+      b.classList.toggle('active', b.dataset.gradient === 'none'));
+    toast('Фон сброшен');
+  };
+
+  document.getElementById('gradientPicker').addEventListener('click', e => {
+    const btn = e.target.closest('[data-gradient]');
+    if(!btn) return;
+    const i = btn.dataset.gradient;
+    selectedGradient = (i === 'none') ? '' : COVER_PRESETS[parseInt(i, 10)].bg;
+    document.querySelectorAll('.gradient-swatch').forEach(b =>
+      b.classList.toggle('active', b === btn));
+  });
+
+  document.getElementById('stickerPicker').addEventListener('click', e => {
+    const btn = e.target.closest('.sticker-toggle');
+    if(!btn) return;
+    const s = btn.dataset.sticker;
+    if(stickerSet.has(s)){ stickerSet.delete(s); }
+    else {
+      if(stickerSet.size >= STICKER_MAX){ toast('Максимум ' + STICKER_MAX + ' наклеек'); return; }
+      stickerSet.add(s);
+    }
+    btn.classList.toggle('active', stickerSet.has(s));
+    counter.textContent = `Выбрано: ${stickerSet.size} из ${STICKER_MAX}`;
+  });
+
+  document.getElementById('cancelBtn').onclick = closeModal;
+  overlay.onclick = e => { if(e.target === overlay) closeModal(); };
+
+  document.getElementById('saveBtn').onclick = () => {
+    const newName = document.getElementById('mName').value.trim();
+    if(!newName) return showErr('Имя не может быть пустым');
+    const p1 = document.getElementById('mNewPass').value;
+    const p2 = document.getElementById('mNewPass2').value;
+    if(p1 || p2){
+      if(p1.length < 4) return showErr('Новый пароль должен быть не короче 4 символов');
+      if(p1 !== p2) return showErr('Новые пароли не совпадают');
+    }
+    user.name = newName;
+    user.bio = document.getElementById('mBio').value.trim();
+    user.avatar = avatarData;
+    user.theme.accent = document.getElementById('mAccent').value;
+    user.theme.bg = document.getElementById('mBg').value;
+    user.theme.bgGradient = selectedGradient;
+    user.theme.bgImage = bgImageData;
+    user.stickers = [...stickerSet];
+    if(p1) user.passHash = hashPass(p1);
+    if(!save()) return;
+    closeModal();
+    toast('Страница обновлена 🎨');
+    renderCurrentUser(); renderProfile(); renderFeed();
+  };
+}
+
+/* --- Добавление друга --- */
+function openAddFriendModal(){
+  if(viewerMode){ toast('Зритель не может добавлять друзей'); return; }
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2 class="serif">Новый друг</h2>
+        <div class="gate-err" id="fErr"></div>
+        <label class="field"><span>Имя</span>
+          <input type="text" id="friendName" maxlength="40" placeholder="Как зовут друга">
+        </label>
+        <label class="field"><span>Пароль для входа</span>
+          <input type="password" id="friendPass" placeholder="Придумайте пароль" autocomplete="new-password">
+        </label>
+        <label class="field"><span>Повторите пароль</span>
+          <input type="password" id="friendPass2" autocomplete="new-password">
+        </label>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px;line-height:1.55">
+          Передайте другу его имя и пароль — по ним он войдёт на этом устройстве.
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="cancelBtn">Отмена</button>
+          <button class="btn btn-primary" id="saveBtn">Добавить</button>
+        </div>
+      </div>
+    </div>`;
+  const overlay = document.getElementById('overlay');
+  const errEl = document.getElementById('fErr');
+  const showErr = m => { errEl.textContent = m; errEl.classList.add('show'); };
+  document.getElementById('cancelBtn').onclick = closeModal;
+  overlay.onclick = e => { if(e.target === overlay) closeModal(); };
+  document.getElementById('saveBtn').onclick = () => {
+    const name = document.getElementById('friendName').value.trim();
+    const p1 = document.getElementById('friendPass').value;
+    const p2 = document.getElementById('friendPass2').value;
+    if(!name) return showErr('Введите имя');
+    if(p1.length < 4) return showErr('Пароль должен быть не короче 4 символов');
+    if(p1 !== p2) return showErr('Пароли не совпадают');
+    if(state.users.find(u => u.name.toLowerCase() === name.toLowerCase()))
+      return showErr('Профиль с таким именем уже есть');
+    const colors = ['#5b7fa8','#8a4a7a','#3f8a6d','#b8622e','#7a6bb0','#c9463c'];
+    state.users.push({
+      id: uid(), name, bio:'', avatar:'', avatarEmoji:'',
+      passHash: hashPass(p1), stickers:[],
+      theme: { accent: colors[Math.floor(Math.random()*colors.length)], bg:'#fdf8f0', bgImage:'', bgGradient:'' }
+    });
+    if(!save()){ state.users.pop(); return; }
+    closeModal();
+    toast('Друг добавлен — передайте ему пароль 🤝');
+  };
+}
+
+/* --- Стиль --- */
+function openThemeModal(){
+  const keys = Object.keys(UI_THEMES);
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2 class="serif">Стиль интерфейса</h2>
+        <p style="color:var(--muted);font-size:13.5px;line-height:1.5;margin:0 0 16px">
+          Выберите настроение уголка. Спокойная музыка подстроится под стиль.
+        </p>
+        <div class="theme-grid">
+          ${keys.map(k => {
+            const t = UI_THEMES[k];
+            const v = Object.assign({}, BASE_VARS, t.vars);
+            return `
+              <button class="theme-card ${state.uiTheme === k ? 'active' : ''}" data-theme="${k}">
+                <div class="theme-preview" style="background:${v['--paper']};border-color:${v['--line']}">
+                  <div class="theme-preview-card" style="background:${v['--card']}"></div>
+                  <div class="theme-preview-accent" style="background:${v['--accent']}"></div>
+                </div>
+                <div class="theme-name">${t.icon} ${t.name}</div>
+              </button>`;
+          }).join('')}
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="closeBtn">Готово</button>
+        </div>
+      </div>
+    </div>`;
+  const overlay = document.getElementById('overlay');
+  overlay.onclick = e => { if(e.target === overlay) closeModal(); };
+  document.getElementById('closeBtn').onclick = closeModal;
+  document.querySelectorAll('.theme-card').forEach(btn => {
+    btn.onclick = () => {
+      const k = btn.dataset.theme;
+      state.uiTheme = k;
+      save();
+      applyUITheme(k);
+      document.querySelectorAll('.theme-card').forEach(b =>
+        b.classList.toggle('active', b.dataset.theme === k));
+      toast(UI_THEMES[k].icon + ' ' + UI_THEMES[k].name);
+    };
+  });
+}
+
+/* --- Настройки --- */
+function openSettingsModal(){
+  if(viewerMode){ toast('Зритель не может открывать настройки'); return; }
+  const dataStr = JSON.stringify(state);
+  document.getElementById('modalRoot').innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2 class="serif">Настройки</h2>
+        <div class="note">
+          ⚠️ Все данные (включая PDF, видео, аудио и фото) хранятся <b>только в этом браузере</b>. Делайте резервную копию — если почистите кеш, всё пропадёт.
+        </div>
+
+        <h2 class="serif" style="margin:22px 0 12px;font-size:17px">Стиль и музыка</h2>
+        <div class="field">
+          <span>Стиль интерфейса</span>
+          <button class="btn btn-ghost" id="themeFromSettings" style="width:100%">
+            🎨 Сменить стиль (сейчас: ${UI_THEMES[state.uiTheme] ? UI_THEMES[state.uiTheme].name : '—'})
+          </button>
+        </div>
+        <div class="field">
+          <span>Громкость музыки: <b id="volLabel">${Math.round(state.musicVolume*100)}%</b></span>
+          <div class="vol-row">
+            <input type="range" id="volSlider" min="0" max="100" value="${Math.round(state.musicVolume*100)}">
+          </div>
+          <button class="btn btn-ghost" id="musicToggleBtn" style="width:100%;margin-top:8px">
+            ${musicEngine.playing ? '⏸ Выключить музыку' : '▶ Включить музыку'}
+          </button>
+        </div>
+
+        <h2 class="serif" style="margin:22px 0 12px;font-size:17px">Резервная копия</h2>
+        <div class="field">
+          <span>Скачать копию всех данных</span>
+          <button class="btn btn-ghost" id="exportBtn" style="width:100%">⭳ Сохранить файл .json</button>
+        </div>
+        <div class="field">
+          <span>Загрузить копию</span>
+          <input type="file" id="importFile" accept="application/json,.json">
+        </div>
+
+        <h2 class="serif" style="margin:22px 0 12px;font-size:17px">Сбросить пароль друга</h2>
+        <div id="resetList"></div>
+
+        <div class="field" style="margin-top:20px">
+          <span>Опасная зона</span>
+          <button class="btn btn-danger" id="wipeBtn" style="width:100%">Удалить все данные</button>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="closeBtn">Готово</button>
+        </div>
+      </div>
+    </div>`;
+
+  const listEl = document.getElementById('resetList');
+  const others = state.users.filter(u => u.id !== state.currentUserId);
+  if(!others.length){
+    listEl.innerHTML = `<p style="font-size:13px;color:var(--muted);margin:0">Пока других профилей нет.</p>`;
+  } else {
+    listEl.innerHTML = others.map(u => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        ${avatarHTML(u, 'avatar')}
+        <span style="flex:1;font-size:14px;font-weight:600">${esc(u.name)}</span>
+        <button class="btn btn-ghost" data-reset-user="${u.id}" style="padding:6px 12px;font-size:13px">Сменить пароль</button>
+      </div>`).join('');
+  }
+
+  const overlay = document.getElementById('overlay');
+  overlay.onclick = e => { if(e.target === overlay) closeModal(); };
+  document.getElementById('closeBtn').onclick = closeModal;
+
+  document.getElementById('themeFromSettings').onclick = () => { closeModal(); openThemeModal(); };
+
+  document.getElementById('volSlider').oninput = e => {
+    const v = parseInt(e.target.value, 10) / 100;
+    state.musicVolume = v;
+    musicEngine.setVolume(v);
+    document.getElementById('volLabel').textContent = Math.round(v*100) + '%';
+    save();
+  };
+
+  document.getElementById('musicToggleBtn').onclick = async () => {
+    if(musicEngine.playing){ musicEngine.stop(); state.musicOn = false; save(); }
+    else { state.musicOn = true; save(); await musicEngine.start(); }
+    updateMusicBtn();
+    closeModal(); openSettingsModal();
+  };
+
+  listEl.onclick = e => {
+    const btn = e.target.closest('[data-reset-user]');
+    if(!btn) return;
+    const u = state.users.find(x => x.id === btn.dataset.resetUser);
+    if(!u) return;
+    const np = prompt('Новый пароль для «' + u.name + '» (минимум 4 символа):');
+    if(np == null) return;
+    if(np.length < 4){ toast('Слишком короткий пароль'); return; }
+    u.passHash = hashPass(np);
+    if(!save()) return;
+    toast('Пароль для «' + u.name + '» обновлён');
+  };
+
+  document.getElementById('exportBtn').onclick = () => {
+    const blob = new Blob([dataStr], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'moy-ugolok-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Копия сохранена');
+  };
+
+  document.getElementById('importFile').onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try{
+        const parsed = JSON.parse(ev.target.result);
+        if(!parsed.users || !parsed.posts) throw new Error('bad');
+        if(!confirm('Заменить все текущие данные загруженной копией?')) return;
+        state = parsed;
+        state.users.forEach(u => {
+          u.theme = Object.assign({accent:'#b8622e', bg:'#fdf8f0', bgImage:'', bgGradient:''}, u.theme || {});
+          u.passHash = u.passHash || null; u.avatar = u.avatar || '';
+          u.avatarEmoji = u.avatarEmoji || ''; u.bio = u.bio || '';
+          u.stickers = Array.isArray(u.stickers) ? u.stickers : [];
+        });
+        state.posts.forEach(p => { p.likes = p.likes || []; });
+        state.uiTheme = state.uiTheme || 'paper';
+        if(typeof state.musicOn !== 'boolean') state.musicOn = true;
+        if(typeof state.musicVolume !== 'number') state.musicVolume = 0.22;
+        if(!state.users.find(u => u.id === state.currentUserId)) state.currentUserId = state.users[0].id;
+        viewingProfileId = state.currentUserId;
+        save(); closeModal();
+        if(!state.authSetup){ clearSession(); renderGate(); }
+        else {
+          applyUITheme(state.uiTheme);
+          musicEngine.setVolume(state.musicVolume);
+          renderAll();
+          toast('Копия загружена ✅');
+        }
+      }catch(err){ alert('Не получилось прочитать файл. Убедитесь, что это копия «Моего уголка».'); }
+    };
+    reader.readAsText(file);
+  };
+
+  document.getElementById('wipeBtn').onclick = () => {
+    if(!confirm('Точно удалить ВСЁ: профили, пароли, фото, PDF, видео, музыку, стихи и книги?')) return;
+    if(!confirm('Это действие нельзя отменить. Продолжить?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    clearSession();
+    musicEngine.stop();
+    state = defaultState();
+    closeModal();
+    renderGate();
+    toast('Всё очищено');
+  };
+}
+
+/* =========================================================
+   ОБРАБОТЧИКИ
+   ========================================================= */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => switchView(tab.dataset.view);
+});
+document.getElementById('chips').onclick = e => {
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  feedFilter = chip.dataset.filter;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c === chip));
+  renderFeed();
+};
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value.trim(); renderFeed();
+});
+document.getElementById('addPostBtn').onclick = openPostModal;
+document.getElementById('settingsBtn').onclick = openSettingsModal;
+document.getElementById('addFriendBtn').onclick = openAddFriendModal;
+document.getElementById('themeBtn').onclick = openThemeModal;
+document.getElementById('logoutBtn').onclick = () => {
+  if(viewerMode){ logout(false); return; }
+  if(confirm('Выйти из уголка?')) logout(false);
+};
+
+document.getElementById('musicBtn').onclick = async () => {
+  if(musicEngine.playing){
+    musicEngine.stop(); state.musicOn = false; save(); updateMusicBtn();
+    toast('Музыка выключена');
+  } else {
+    state.musicOn = true; save();
+    const ok = await musicEngine.start(); updateMusicBtn();
+    toast(ok ? 'Музыка включена 🎵' : 'Не удалось запустить музыку');
+  }
+};
+
+document.querySelector('main').addEventListener('click', e => {
+  const del = e.target.closest('[data-del]');
+  if(del){
+    if(confirm('Удалить эту запись?')){
+      state.posts = state.posts.filter(p => p.id !== del.dataset.del);
+      save(); renderFeed();
+      if(document.getElementById('profileView').style.display !== 'none') renderProfile();
+      toast('Запись удалена');
+    }
+    return;
+  }
+  const like = e.target.closest('[data-like]');
+  if(like){
+    if(viewerMode) return;
+    const post = state.posts.find(p => p.id === like.dataset.like);
+    if(!post) return;
+    post.likes = post.likes || [];
+    const idx = post.likes.indexOf(state.currentUserId);
+    if(idx === -1) post.likes.push(state.currentUserId);
+    else post.likes.splice(idx, 1);
+    save(); renderFeed();
+    if(document.getElementById('profileView').style.display !== 'none') renderProfile();
+    return;
+  }
+  const more = e.target.closest('[data-more]');
+  if(more){
+    const p = document.getElementById('txt-' + more.dataset.more);
+    if(p){
+      p.classList.toggle('clamped');
+      more.textContent = p.classList.contains('clamped') ? 'Читать дальше →' : '← Свернуть';
+    }
+    return;
+  }
+  const author = e.target.closest('[data-author]');
+  if(author) openAuthorProfile(author.dataset.author);
+});
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+/* =========================================================
+   СТАРТ
+   ========================================================= */
+load();
+const session = getSession();
+if(session && state.authSetup){
+  const user = state.users.find(u => u.id === session.userId);
+  if(user){ viewerMode = false; state.currentUserId = user.id; startApp(); }
+  else { clearSession(); renderGate(); }
+} else {
+  renderGate();
+}
+</script>
+</body>
+</html>
